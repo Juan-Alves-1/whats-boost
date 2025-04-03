@@ -1,1 +1,36 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
 .env
+.env.*  # optional: if you use .env.dev, .env.prod, etc.
+
+# IDEs/editors
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Testing / coverage
+htmlcov/
+.tox/
+.coverage
+.cache
+pytest_cache/
+nosetests.xml
+coverage.xml
+
+# MyPy / Pyright
+.mypy_cache/
+.pyright/
+
+# Build
+build/
+dist/
+*.egg-info/
+

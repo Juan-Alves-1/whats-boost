@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     EVO_C_URL: str
 
     class Config:
-        env_file = ".env"
+        env_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '.env'))
+
 
 settings = Settings()

@@ -1,7 +1,8 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends, Request
 from pydantic import BaseModel
 from typing import List
 from app.services.send_media import send_group_media_messages
+from app.dependencies.auth import auth_required
 
 router = APIRouter()
 
@@ -16,7 +17,7 @@ class BulkMediaRequest(BaseModel):
     mimetype: str
 
 @router.post("/media")
-def send_bulk_media(payload: BulkMediaRequest):
+def send_bulk_media(payload: BulkMediaRequest, user=Depends(auth_required)):
     try:
         results = send_group_media_messages(
             group_ids=payload.group_ids,

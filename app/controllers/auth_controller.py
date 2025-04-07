@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Request
+from fastapi.responses import HTMLResponse
 from starlette.responses import RedirectResponse
 from authlib.integrations.starlette_client import OAuth
 from app.config.settings import settings
@@ -24,9 +25,29 @@ async def login(request: Request):
 async def auth(request: Request):
     token = await oauth.google.authorize_access_token(request)
     user = token.get('userinfo')
-    if user:
+
+    allowed_emails = ["juan_alves_12@hotmail.com"]
+
+    if user and user["email"] in allowed_emails:
         request.session['user'] = dict(user)
-    return RedirectResponse(url="/me")
+        return RedirectResponse(url="/me")
+    else:
+        return RedirectResponse(url="/unauthorized")
+
+@router.get("/unauthorized")
+async def unauthorized():
+    return HTMLResponse(content="""
+        <html>
+            <head>
+                <title>Unauthorized</title>
+            </head>
+            <body style="font-family: Arial, sans-serif; text-align: center; margin-top: 50px;">
+                <h1>🚫 Access Denied</h1>
+                <p>This Google account is not allowed to access this app.</p>
+                <a href="/login">Try a different account</a>
+            </body>
+        </html>
+    """, status_code=403)
 
 @router.get("/logout")
 async def logout(request: Request):

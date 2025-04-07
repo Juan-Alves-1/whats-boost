@@ -1,7 +1,8 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends, Request
 from pydantic import BaseModel
 from typing import List, Optional
 from app.services.send_text import send_group_text_messages
+from app.dependencies.auth import auth_required
 
 router = APIRouter()
 
@@ -12,7 +13,7 @@ class BulkTextRequest(BaseModel):
     subsequent_delay: Optional[int] = 70000
 
 @router.post("/text")
-def send_bulk_text(payload: BulkTextRequest):
+def send_bulk_text(payload: BulkTextRequest, user=Depends(auth_required)):
     try:
         results = send_group_text_messages(
             group_ids=payload.group_ids,

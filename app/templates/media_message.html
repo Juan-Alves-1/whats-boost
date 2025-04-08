@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Send WhatsApp Media</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#fffcf5] min-h-screen flex items-center justify-center font-sans">
+  <!-- Spinner overlay is shown when the form is submitted  -->
+  <div id="spinner-overlay" class="fixed inset-0 bg-white bg-opacity-70 flex items-center justify-center z-50 hidden">
+    <div class="w-12 h-12 border-4 border-yellow-300 border-t-transparent rounded-full animate-spin"></div>
+  </div>
+
+  <div class="text-center w-[90%] max-w-sm p-6 bg-white bg-opacity-0 rounded-xl shadow-none">
+    <div class="inline-block bg-[#fff3c4] text-sm font-semibold px-3 py-1 rounded mb-4">
+      Text + Image
+    </div>
+
+    <div class="font-semibold text-lg mb-2">Message</div>
+    <form method="post" action="{{ form_action }}" onsubmit="showSpinner()">
+      <!-- Text Message -->
+      <textarea name="message_text"
+                required
+                placeholder="Type your message here..."
+                class="w-full h-24 p-2 rounded bg-[#f4f1ea] font-mono resize-none focus:outline-none focus:ring-2 focus:ring-yellow-400"
+      ></textarea>
+
+      <!-- Image URL -->
+      <div class="mt-4 text-left text-sm font-semibold text-gray-700">Image URL</div>
+      <input type="url"
+             name="image_url"
+             placeholder="https://example.com/image.jpg"
+             required
+             class="w-full mt-1 p-2 rounded bg-[#f4f1ea] font-mono focus:outline-none focus:ring-2 focus:ring-yellow-400"
+      />
+
+      <!-- Image Name -->
+      <div class="mt-4 text-left text-sm font-semibold text-gray-700">Image Name</div>
+      <input type="text"
+             name="image_name"
+             placeholder="example.jpg"
+             required
+             class="w-full mt-1 p-2 rounded bg-[#f4f1ea] font-mono focus:outline-none focus:ring-2 focus:ring-yellow-400"
+      />
+
+      <!-- Submit -->
+      <button type="submit"
+              class="mt-6 w-full bg-[#f7c948] hover:bg-yellow-400 text-black font-bold py-2 px-4 rounded transition"
+      >
+        Send
+      </button>
+    </form>
+  </div>
+
+<!-- it seems not to work well; skipping groups
+  <script>
+    // Show the loading spinner while waiting for the server to respond
+    function showSpinner() {
+      document.getElementById('spinner-overlay').classList.remove('hidden');
+    }
+  </script>
+
+{% if success %}
+<script>
+  window.addEventListener('DOMContentLoaded', function () {
+    alert("✅ Message sent successfully to all groups");
+  });
+</script>
+{% endif %}
+-->
+</body>
+</html>

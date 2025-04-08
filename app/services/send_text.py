@@ -19,7 +19,7 @@ def send_text_message(group_id: str, message_text: str, delay: int):
     return f"Response for group {group_id}: {response.text}"
 
 # Sends text messages to a list of groups
-def send_group_text_messages(group_ids: list[str], message_text: str, initial_delay: int = 10000, subsequent_delay: int = 70000):
+def send_group_text_messages(group_ids: list[str], message_text: str, initial_delay: int = 5000, subsequent_delay: int = 20000):
     results = []
     for i, group_id in enumerate(group_ids):
         current_delay = initial_delay if i == 0 else subsequent_delay

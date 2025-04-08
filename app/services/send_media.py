@@ -21,7 +21,7 @@ def send_media_message(group_id: str, caption: str, media_url: str, file_name: s
     response = requests.post(url, json=payload, headers=headers)
     return f"Response for group {group_id}: {response.text}"
 
-def send_group_media_messages(group_ids: list[str], caption: str, media_url: str, file_name: str, initial_delay: int = 10000, subsequent_delay: int = 70000, mediatype: str = "image", mimetype: str = "image/jpg"):
+def send_group_media_messages(group_ids: list[str], caption: str, media_url: str, file_name: str, initial_delay: int = 5000, subsequent_delay: int = 20000, mediatype: str = "image", mimetype: str = "image/jpg"):
     results = []
     for i, group_id in enumerate(group_ids):
         current_delay = initial_delay if i == 0 else subsequent_delay

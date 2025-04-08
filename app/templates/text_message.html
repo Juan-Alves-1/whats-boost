@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Send WhatsApp Text</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#fffcf5] min-h-screen flex items-center justify-center font-sans">
+  <!-- Spinner Overlay -->
+  <div id="spinner-overlay" class="fixed inset-0 bg-white bg-opacity-70 flex items-center justify-center z-50 hidden">
+    <div class="w-12 h-12 border-4 border-yellow-300 border-t-transparent rounded-full animate-spin"></div>
+  </div>
+
+  <div class="text-center w-[90%] max-w-sm p-6 bg-white bg-opacity-0 rounded-xl shadow-none">
+    <div class="inline-block bg-[#fff3c4] text-sm font-semibold px-3 py-1 rounded mb-4">
+      Only text
+    </div>
+    <div class="font-semibold text-lg mb-2">Message</div>
+    <form method="post" action="{{ form_action }}" onsubmit="showSpinner()">
+      <textarea name="message_text"
+                required
+                placeholder="Type your message here..."
+                class="w-full h-24 p-2 rounded bg-[#f4f1ea] font-mono resize-none focus:outline-none focus:ring-2 focus:ring-yellow-400"
+      ></textarea>
+      <button type="submit"
+              class="mt-4 w-full bg-[#f7c948] hover:bg-yellow-400 text-black font-bold py-2 px-4 rounded transition"
+      >
+        Send
+      </button>
+    </form>
+  </div>
+
+  <script>
+    function showSpinner() {
+      document.getElementById('spinner-overlay').classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>

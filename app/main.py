@@ -6,7 +6,7 @@ from app.controllers import text_controller, media_controller, auth_controller
 app = FastAPI(title="WhatsApp Boost Tool")
 
 # Add session middleware
-app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
+app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY, https_only=False)
 
 app.include_router(auth_controller.router, tags=["Auth"])
 # Include text_controller routes under a specific path

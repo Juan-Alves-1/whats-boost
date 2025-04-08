@@ -26,9 +26,7 @@ async def auth(request: Request):
     token = await oauth.google.authorize_access_token(request)
     user = token.get('userinfo')
 
-    allowed_emails = ["juan_alves_12@hotmail.com"]
-
-    if user and user["email"] in allowed_emails:
+    if user and user["email"] in settings.ALLOWED_EMAILS:
         request.session['user'] = dict(user)
         return RedirectResponse(url="/me")
     else:

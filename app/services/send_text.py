@@ -1,4 +1,5 @@
 import requests
+import time
 from app.config.settings import settings
 
 # Sends a text message to a single group
@@ -24,6 +25,7 @@ def send_group_text_messages(group_ids: list[str], message_text: str, initial_de
     for i, group_id in enumerate(group_ids):
         current_delay = initial_delay if i == 0 else subsequent_delay
         result = send_text_message(group_id, message_text, current_delay)
+        time.sleep(current_delay / 1000)  # Waits between calls in seconds
         results.append(result)
     return results
 

@@ -1,4 +1,5 @@
 import requests
+import time
 from app.config.settings import settings
 
 def send_media_message(group_id: str, caption: str, media_url: str, file_name: str, delay: int = 10000, mediatype: str = "image", mimetype: str = "image/jpg"):
@@ -25,6 +26,7 @@ def send_group_media_messages(group_ids: list[str], caption: str, media_url: str
     results = []
     for i, group_id in enumerate(group_ids):
         current_delay = initial_delay if i == 0 else subsequent_delay
+        time.sleep(current_delay / 1000)  # Waits between calls in seconds and sets the pace for external calls
         result = send_media_message(
             group_id=group_id,
             caption=caption,
@@ -34,5 +36,6 @@ def send_group_media_messages(group_ids: list[str], caption: str, media_url: str
             mediatype=mediatype,
             mimetype=mimetype
         )
+        print(f"Sending media to {group_id} at {time.time()}")
         results.append(result)
     return results

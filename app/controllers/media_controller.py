@@ -1,14 +1,13 @@
 from fastapi import APIRouter, HTTPException, Depends, Request, Form
 from pydantic import BaseModel
 from typing import List
-from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from app.services.send_media import send_group_media_messages
 from app.dependencies.auth import auth_required
 from app.config.group_map import GROUP_IDS
+from app.config.templates import templates
 
 router = APIRouter()
-templates = Jinja2Templates(directory="app/templates") # Rewrite the path in a more robust way
 
 class BulkMediaRequest(BaseModel):
     group_ids: List[str]

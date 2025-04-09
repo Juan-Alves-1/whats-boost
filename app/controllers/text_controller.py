@@ -2,13 +2,12 @@ from fastapi import APIRouter, HTTPException, Depends, Request, Form
 from pydantic import BaseModel
 from typing import List, Optional
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 from app.services.send_text import send_group_text_messages
 from app.dependencies.auth import auth_required
 from app.config.group_map import GROUP_IDS
+from app.config.templates import templates
 
 router = APIRouter()
-templates = Jinja2Templates(directory="app/templates") # Rewrite the path in a more robust way
 
 class BulkTextRequest(BaseModel):
     group_ids: List[str]
@@ -34,7 +33,7 @@ async def send_bulk_text_ui(
         )
         return templates.TemplateResponse("text_message.html", {
             "request": request,
-            "form_action": request.url_for("send_bulk_text_ui"), # It dynamically constructs the URL path
+            "form_action": request.url_for("send_bulk_text_ui"), # It dynamically constructs the URL path, exactly what Jinja2 expects
             "success": True,  # Tells the frontend when to fire the alert
             "Result": results # Double-check !!!!!!!!!!!!!!!!!!!!!!!
         })

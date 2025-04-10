@@ -27,10 +27,7 @@ async def send_bulk_text_ui(
 ):
     try:
         group_ids = list(GROUP_IDS.values()) # Gets all test group IDs
-        results = send_group_text_messages(
-            group_ids=group_ids,
-            message_text=message_text,
-        )
+        results = await send_group_text_messages(group_ids, message_text)
         return templates.TemplateResponse("text_message.html", {
             "request": request,
             "form_action": request.url_for("send_bulk_text_ui"), # It dynamically constructs the URL path, exactly what Jinja2 expects

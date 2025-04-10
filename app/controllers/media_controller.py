@@ -27,7 +27,7 @@ async def show_media_form(request: Request, user=Depends(auth_required)):
 async def send_bulk_media_ui(request: Request , message_text: str = Form(...), image_url: str = Form(...), image_name: str = Form(...), user=Depends(auth_required)):
     try:
         group_ids = list(GROUP_IDS.values()) # Gets all test group IDs
-        results = send_group_media_messages(
+        results = await send_group_media_messages(
             group_ids=group_ids,
             caption=message_text,
             media_url=image_url,

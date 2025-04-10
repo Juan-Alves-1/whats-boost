@@ -1,8 +1,20 @@
-import requests
-import time
+import asyncio
+import random
+import httpx
+from datetime import datetime
 from app.config.settings import settings
 
-def send_media_message(group_id: str, caption: str, media_url: str, file_name: str, delay: int = 10000, mediatype: str = "image", mimetype: str = "image/jpg"):
+# Format timestamp for logging readability
+def format_timestamp(ts: str) -> str:
+    try:
+        return datetime.fromtimestamp(int(ts)).strftime('%Y-%m-%d %H:%M:%S')
+    except Exception:
+        return "Invalid timestamp"
+
+# Send media to a single group with EVO-API and staggered server delay
+async def send_media_message(group_id: str, caption: str, media_url: str, file_name: str, evo_delay_ms: int, server_delay_sec: int, mediatype: str, mimetype: str):
+    await asyncio.sleep(server_delay_sec)
+
     url = f"{settings.EVO_C_URL}/message/sendMedia/{settings.INSTANCE_ID}"
     payload = {
         "number": group_id,
@@ -11,7 +23,7 @@ def send_media_message(group_id: str, caption: str, media_url: str, file_name: s
         "caption": caption,
         "media": media_url,
         "fileName": file_name,
-        "delay": delay,
+        "delay": evo_delay_ms,
         "linkPreview": True,
         "mentionsEveryOne": False
     }
@@ -19,23 +31,55 @@ def send_media_message(group_id: str, caption: str, media_url: str, file_name: s
         "apikey": settings.API_KEY,
         "Content-Type": "application/json"
     }
-    response = requests.post(url, json=payload, headers=headers)
-    return f"Response for group {group_id}: {response.text}"
+    timeout = httpx.Timeout(connect=10.0, read=45.0, write=10.0, pool=60.0)
 
-def send_group_media_messages(group_ids: list[str], caption: str, media_url: str, file_name: str, initial_delay: int = 5000, subsequent_delay: int = 20000, mediatype: str = "image", mimetype: str = "image/jpg"):
-    results = []
-    for i, group_id in enumerate(group_ids):
-        current_delay = initial_delay if i == 0 else subsequent_delay
-        time.sleep(current_delay / 1000)  # Waits between calls in seconds and sets the pace for external calls
-        result = send_media_message(
+    try:
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            response = await client.post(url, json=payload, headers=headers)
+
+        if response.status_code == 201 and "application/json" in response.headers.get("content-type", ""):
+            data = response.json()
+            key = data.get("key", {})
+            msg_id = key.get("id", "N/A")
+            timestamp = format_timestamp(data.get("messageTimestamp", "N/A"))
+            status = data.get("status", "UNKNOWN")
+            print(f"✅ Message sent to group ID: {group_id} | Message ID: {msg_id} at {timestamp} | EVO status: {status}")
+            return {"group_id": group_id, "success": True}
+        else:
+            print(f"⚠️ Unexpected response from EVO API for group ID: {group_id} | Status code: {response.status_code}")
+            return {"group_id": group_id, "success": False, "response": response.text}
+
+    except httpx.ReadTimeout:
+        print(f"⏱️ TIMEOUT for {group_id} — EVO took too long to respond.")
+        return {"group_id": group_id, "success": False, "error": "timeout"}
+    except Exception as e:
+        print(f"❌ {group_id} | Exception: {str(e)}")
+        return {"group_id": group_id, "success": False, "error": str(e)}
+
+# Schedule media tasks with staggered delay
+async def send_group_media_messages(group_ids: list[str], caption: str, media_url: str, file_name: str, min_delay_sec: int = 15, max_delay_sec: int = 25, mediatype: str = "image", mimetype: str = "image/jpg"):
+    total_server_delay = 0
+    tasks = []
+
+    for group_id in group_ids:
+        evo_typing_delay_ms = random.randint(min_delay_sec * 1000, max_delay_sec * 1000)
+        delay_gap = random.randint(min_delay_sec, max_delay_sec)
+        total_server_delay += delay_gap
+        print(f"📝 Scheduling media to {group_id} in {total_server_delay}s")
+
+        task = asyncio.create_task(send_media_message(
             group_id=group_id,
             caption=caption,
             media_url=media_url,
             file_name=file_name,
-            delay=current_delay,
+            evo_delay_ms=evo_typing_delay_ms,
+            server_delay_sec=total_server_delay,
             mediatype=mediatype,
             mimetype=mimetype
-        )
-        print(f"Sending media to {group_id} at {time.time()}")
-        results.append(result)
+        ))
+        tasks.append(task)
+
+    print("🚀 All media tasks scheduled. Awaiting execution...\n")
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+    print("\n✅ All media tasks completed.\n")
     return results

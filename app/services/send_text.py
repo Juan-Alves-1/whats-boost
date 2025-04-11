@@ -3,7 +3,7 @@ import random
 import httpx
 from datetime import datetime
 from app.config.settings import settings
-
+import traceback
 
 # Formats timestamp for logging readability
 def format_timestamp(ts: str) -> str:
@@ -29,7 +29,7 @@ async def send_text_message(group_id: str, message_text: str, evo_delay_ms: int,
         "Content-Type": "application/json"
     }
 
-    timeout = httpx.Timeout(connect=10.0, read=45.0, write=10.0, pool=60.0) # Sets parameters since httpx requests will wait for EVO API response
+    timeout = httpx.Timeout(connect=15.0, read=45.0, write=15.0, pool=60.0) # Sets parameters since httpx requests will wait for EVO API response
 
     try:
         async with httpx.AsyncClient(timeout=timeout) as client:
@@ -57,7 +57,6 @@ async def send_text_message(group_id: str, message_text: str, evo_delay_ms: int,
         print(f"❌ {group_id} | Exception: {str(e)}")
         return {"group_id": group_id, "success": False, "error": str(e)}
 
-
 # Schedules all tasks 
 async def send_group_text_messages(group_ids: list[str], message_text: str, min_delay_sec: int = 12, max_delay_sec: int = 18):
     total_server_delay = 0  
@@ -81,7 +80,12 @@ async def send_group_text_messages(group_ids: list[str], message_text: str, min_
         tasks.append(task)
 
     print("🚀 All message tasks scheduled. Awaiting execution...\n")
-    #Investiage: did not return status when the browser was closed, whereas without it it returns the status code on the console immediately
-    results = await asyncio.gather(*tasks, return_exceptions=True) # manually handles failed results to avoid crashing the entire endpoint
-    print("\n✅ All message tasks completed.\n")
+
+    # Review
+    try:
+        results = await asyncio.gather(*tasks, return_exceptions=True) # Manually handles failed results to avoid crashing the entire endpoint
+    except Exception as e:
+        print(f"❌ BATCH ERROR: {str(e)}")
+        traceback.print_exc()
+        results = []
     return results

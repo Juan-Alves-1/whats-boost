@@ -1,11 +1,10 @@
 from fastapi import APIRouter, HTTPException, Depends, Request, Form
 from pydantic import BaseModel
 from typing import List
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import RedirectResponse
 from app.services.send_media import send_group_media_messages
 from app.dependencies.auth import auth_required
 from app.config.group_map import GROUP_IDS
-from app.config.templates import templates
 import asyncio
 
 router = APIRouter()
@@ -20,17 +19,7 @@ class BulkMediaRequest(BaseModel):
     mediatype: str
     mimetype: str
 
-@router.get("/media", response_class=HTMLResponse)
-async def show_media_form(request: Request, user=Depends(auth_required)):
-    sent = request.query_params.get("sent") == "true"
-    return templates.TemplateResponse("media_message.html", {
-        "request": request,
-        "form_action": request.url_for("send_bulk_media_ui"),
-        "success": sent,  # flag to show confirmation
-        "Result": "The messages were scheduled!"
-    })
-
-@router.post("/media")
+@router.post("/api/v1/messages/media", name="send_media_ui")
 async def send_bulk_media_ui(request: Request , message_text: str = Form(...), image_url: str = Form(...), image_name: str = Form(...), user=Depends(auth_required)):
     try:
         group_ids = list(GROUP_IDS.values()) # Gets all test group IDs

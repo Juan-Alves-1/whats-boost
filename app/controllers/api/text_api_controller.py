@@ -5,7 +5,6 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from app.services.send_text import send_group_text_messages
 from app.dependencies.auth import auth_required
 from app.config.group_map import GROUP_IDS
-from app.config.templates import templates
 import asyncio
 
 router = APIRouter()
@@ -13,20 +12,10 @@ router = APIRouter()
 class BulkTextRequest(BaseModel):
     group_ids: List[str]
     message_text: str
-    initial_delay: Optional[int] = 10000
-    subsequent_delay: Optional[int] = 70000
+    initial_delay: Optional[int] = 15
+    subsequent_delay: Optional[int] = 60
 
-@router.get("/text", response_class=HTMLResponse)
-async def show_text_form(request: Request, user=Depends(auth_required)):
-    sent = request.query_params.get("sent") == "true"
-    return templates.TemplateResponse("text_message.html", {
-        "request": request,
-        "form_action": request.url_for("send_bulk_text_ui"),
-        "success": sent,  # flag to show confirmation
-        "Result": "The messages were scheduled!"
-    })
-
-@router.post("/text", response_class=HTMLResponse)
+@router.post("/api/v1/messages/text", response_class=HTMLResponse, name="send_text_ui")
 async def send_bulk_text_ui(
     request: Request,
     message_text: str = Form(...),

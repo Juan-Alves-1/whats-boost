@@ -46,7 +46,7 @@ async def send_text_message(group_id: str, message_text: str, evo_delay_ms: int,
             return {"group_id": group_id, "success": True}
 
         else:
-            print(f"⚠️ Unexpected response from EVO API for group ID: {group_id} | Status code: {response.status_code}")
+            print(f"🟡 Unexpected response from EVO API for group ID: {group_id} | Status code: {response.status_code} | Reason: {response.reason_phrase} \n Headers: {response.headers}")
             return {"group_id": group_id, "success": False, "response": response.text}
 
     except httpx.ReadTimeout:
@@ -84,6 +84,7 @@ async def send_group_text_messages(group_ids: list[str], message_text: str, min_
     # Review
     try:
         results = await asyncio.gather(*tasks, return_exceptions=True) # Manually handles failed results to avoid crashing the entire endpoint
+        print("\n✅ All text tasks completed.\n")
     except Exception as e:
         print(f"❌ BATCH ERROR: {str(e)}")
         traceback.print_exc()

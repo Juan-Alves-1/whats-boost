@@ -3,6 +3,7 @@ import random
 import httpx
 from datetime import datetime
 from app.config.settings import settings
+import traceback
 
 # Format timestamp for logging readability
 def format_timestamp(ts: str) -> str:
@@ -31,7 +32,7 @@ async def send_media_message(group_id: str, caption: str, media_url: str, file_n
         "apikey": settings.API_KEY,
         "Content-Type": "application/json"
     }
-    timeout = httpx.Timeout(connect=10.0, read=45.0, write=10.0, pool=60.0)
+    timeout = httpx.Timeout(connect=15.0, read=45.0, write=15.0, pool=60.0)
 
     try:
         async with httpx.AsyncClient(timeout=timeout) as client:
@@ -46,7 +47,7 @@ async def send_media_message(group_id: str, caption: str, media_url: str, file_n
             print(f"✅ Message sent to group ID: {group_id} | Message ID: {msg_id} at {timestamp} | EVO status: {status}")
             return {"group_id": group_id, "success": True}
         else:
-            print(f"⚠️ Unexpected response from EVO API for group ID: {group_id} | Status code: {response.status_code}")
+            print(f"🟡 Unexpected response from EVO API for group ID: {group_id} | Status code: {response.status_code} | Reason: {response.reason_phrase} \n Headers: {response.headers}")
             return {"group_id": group_id, "success": False, "response": response.text}
 
     except httpx.ReadTimeout:
@@ -57,7 +58,7 @@ async def send_media_message(group_id: str, caption: str, media_url: str, file_n
         return {"group_id": group_id, "success": False, "error": str(e)}
 
 # Schedule media tasks with staggered delay
-async def send_group_media_messages(group_ids: list[str], caption: str, media_url: str, file_name: str, min_delay_sec: int = 15, max_delay_sec: int = 25, mediatype: str = "image", mimetype: str = "image/jpg"):
+async def send_group_media_messages(group_ids: list[str], caption: str, media_url: str, file_name: str, min_delay_sec: int = 20, max_delay_sec: int = 30, mediatype: str = "image", mimetype: str = "image/jpg"):
     total_server_delay = 0
     tasks = []
 
@@ -80,6 +81,12 @@ async def send_group_media_messages(group_ids: list[str], caption: str, media_ur
         tasks.append(task)
 
     print("🚀 All media tasks scheduled. Awaiting execution...\n")
-    results = await asyncio.gather(*tasks, return_exceptions=True)
-    print("\n✅ All media tasks completed.\n")
+
+    try:
+        results = await asyncio.gather(*tasks, return_exceptions=True) # Manually handles failed results to avoid crashing the entire endpoint
+        print("\n✅ All media tasks completed.\n")
+    except Exception as e:
+        print(f"❌ BATCH ERROR: {str(e)}")
+        traceback.print_exc()
+        results = []
     return results

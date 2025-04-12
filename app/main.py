@@ -4,7 +4,7 @@ from app.config.settings import settings
 
 # Route Controllers
 from app.controllers import  auth_controller
-from app.controllers.ui import homepage_controller, text_ui_controller, media_ui_controller
+from app.controllers.ui import homepage_controller, message_type_ui_controller, text_ui_controller, media_ui_controller
 from app.controllers.api import text_api_controller, media_api_controller
 
 app = FastAPI(title="WhatsApp Boost Tool")
@@ -17,6 +17,7 @@ app.include_router(auth_controller.router, tags=["Auth"])
 
 # 🌐 UI Routes (Jinja2)
 app.include_router(homepage_controller.router, tags=["Home"])  # Homepage
+app.include_router(message_type_ui_controller.router, tags=["UI"]) # Show message options
 app.include_router(text_ui_controller.router, tags=["UI"]) # Show form for text
 app.include_router(media_ui_controller.router, tags=["UI"]) # Show form for media
 

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Choose Message Type</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#fffcf5] min-h-screen flex items-center justify-center font-sans">
+
+  <div class="text-center mt-[-8rem] w-[90%] max-w-sm p-6 bg-white bg-opacity-0 rounded-xl shadow-none">
+    <div class="text-base font-medium text-gray-800 mb-6">
+      Choose what kind of message to send 😃
+    </div>
+
+    <div class="flex flex-col gap-4">
+      <form method="get" action="{{ text_form }}" >
+        <button type="submit"
+                class="bg-[#f7c948] hover:bg-yellow-400 text-black font-semibold py-2 px-4 rounded transition"
+        >
+          Text Only
+        </button>
+      </form>
+
+      <form method="get" action="{{ media_form }}" >
+        <button type="submit"
+                class="bg-[#f7c948] hover:bg-yellow-400 text-black font-semibold py-2 px-4 rounded transition"
+        >
+          Text + Image
+        </button>
+      </form>
+    </div>
+  </div>
+
+</body>
+</html>

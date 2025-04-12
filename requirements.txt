@@ -7,3 +7,6 @@ authlib
 itsdangerous
 httpx
 Jinja2
+typing
+asyncio
+python-multipart

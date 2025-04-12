@@ -1,6 +1,9 @@
 uvicorn
+starlette
 fastapi
 pydantic
 pydantic_settings
 authlib
 itsdangerous
+httpx
+Jinja2

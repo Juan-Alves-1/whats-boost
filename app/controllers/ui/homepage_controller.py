@@ -6,4 +6,7 @@ router = APIRouter()
 
 @router.get("/", response_class=HTMLResponse)
 async def show_homepage(request: Request):
-    return templates.TemplateResponse("index.html", context= {"request": request})
+    return templates.TemplateResponse("index.html", context= {
+        "request": request,
+        "login_url": request.url_for("login")
+    })

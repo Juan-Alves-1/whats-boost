@@ -5,7 +5,7 @@ from app.config.templates import templates
 
 router = APIRouter()
 
-@router.get("/send-text", response_class=HTMLResponse, name="show_text_form")
+@router.get("/send-text", response_class=HTMLResponse)
 async def show_text_form(request: Request, user=Depends(auth_required)):
     sent = request.query_params.get("sent") == "true"
     return templates.TemplateResponse("text_message.html", {

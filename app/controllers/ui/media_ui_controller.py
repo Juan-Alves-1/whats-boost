@@ -6,7 +6,7 @@ from app.config.templates import templates
 
 router = APIRouter()
 
-@router.get("/send-media", response_class=HTMLResponse, name="show_media_form")
+@router.get("/send-media", response_class=HTMLResponse)
 async def show_media_form(request: Request, user=Depends(auth_required)):
     sent = request.query_params.get("sent") == "true"
     return templates.TemplateResponse("media_message.html", {

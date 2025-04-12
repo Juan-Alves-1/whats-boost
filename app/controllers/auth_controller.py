@@ -28,7 +28,7 @@ async def auth(request: Request):
 
     if user and user["email"] in settings.ALLOWED_EMAILS:
         request.session['user'] = dict(user)
-        return RedirectResponse(url="/me")
+        return RedirectResponse(url="/choose") # Make it dynamically later 
     else:
         return RedirectResponse(url="/unauthorized")
 

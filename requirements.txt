@@ -1,4 +1,6 @@
 uvicorn
 fastapi
+pydantic
+pydantic_settings
 authlib
 itsdangerous

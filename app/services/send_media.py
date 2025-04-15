@@ -1,9 +1,11 @@
 import asyncio
 import random
 import httpx
+import traceback
 from datetime import datetime
 from app.config.settings import settings
-import traceback
+from app.utils.http_client import shared_http_client
+
 
 # Format timestamp for logging readability
 def format_timestamp(ts: str) -> str:
@@ -30,35 +32,46 @@ async def send_media_message(group_id: str, caption: str, media_url: str, file_n
     }
     headers = {
         "apikey": settings.API_KEY,
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        # "User-Agent": "WhatsBoost/1.0 (http://......:8000)"
     }
-    timeout = httpx.Timeout(connect=15.0, read=45.0, write=15.0, pool=60.0)
 
-    try:
-        async with httpx.AsyncClient(timeout=timeout) as client:
-            response = await client.post(url, json=payload, headers=headers)
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            response = await shared_http_client.post(url, json=payload, headers=headers)
+                
+            if response.status_code == 201 and "application/json" in response.headers.get("content-type", ""):
+                data = response.json()
+                key = data.get("key", {})
+                msg_id = key.get("id", "N/A")
+                timestamp = format_timestamp(data.get("messageTimestamp", "N/A"))
+                status = data.get("status", "UNKNOWN")
+                print(f"✅ Message sent to group ID: {group_id} | Message ID: {msg_id} at {timestamp} | EVO status: {status}")
+                return {"group_id": group_id, "success": True}
+            
+            elif response.status_code == 400:
+                print(f"🔁 Status: 400 | Group ID: {group_id}, attempt {attempt + 1}/{max_retries}. Retrying...")
+                print(f"Response: {response.text}")
+                await asyncio.sleep(2 ** attempt + 1)
+                continue
 
-        if response.status_code == 201 and "application/json" in response.headers.get("content-type", ""):
-            data = response.json()
-            key = data.get("key", {})
-            msg_id = key.get("id", "N/A")
-            timestamp = format_timestamp(data.get("messageTimestamp", "N/A"))
-            status = data.get("status", "UNKNOWN")
-            print(f"✅ Message sent to group ID: {group_id} | Message ID: {msg_id} at {timestamp} | EVO status: {status}")
-            return {"group_id": group_id, "success": True}
-        else:
-            print(f"🟡 Unexpected response from EVO API for group ID: {group_id} | Status code: {response.status_code} | Reason: {response.reason_phrase} \n Headers: {response.headers}")
-            return {"group_id": group_id, "success": False, "response": response.text}
+            else:
+                print(f"🟡 Unexpected response for group ID: {group_id} | Status code: {response.status_code} | Reason: {response.reason_phrase} \n Headers: {response.headers}")
+                return {"group_id": group_id, "success": False, "response": response.text}
 
-    except httpx.ReadTimeout:
-        print(f"⏱️ TIMEOUT for {group_id} — EVO took too long to respond.")
-        return {"group_id": group_id, "success": False, "error": "timeout"}
-    except Exception as e:
-        print(f"❌ {group_id} | Exception: {str(e)}")
-        return {"group_id": group_id, "success": False, "error": str(e)}
+        except httpx.ReadTimeout:
+            print(f"⏱️ TIMEOUT for {group_id} — EVO took too long to respond.")
+            return {"group_id": group_id, "success": False, "error": "timeout"}
+        except Exception as e:
+            print(f"❌ {group_id} | Exception: {str(e)}")
+            return {"group_id": group_id, "success": False, "error": str(e)}
+        
+    print(f"❌ Group ID: {group_id} | All {max_retries} retries failed with status 400.")
+    return {"group_id": group_id, "success": False, "error": "Max retries exceeded"}
 
 # Schedule media tasks with staggered delay
-async def send_group_media_messages(group_ids: list[str], caption: str, media_url: str, file_name: str, min_delay_sec: int = 20, max_delay_sec: int = 30, mediatype: str = "image", mimetype: str = "image/jpg"):
+async def send_group_media_messages(group_ids: list[str], caption: str, media_url: str, file_name: str, min_delay_sec: int = 25, max_delay_sec: int = 35, mediatype: str = "image", mimetype: str = "image/jpg"):
     total_server_delay = 0
     tasks = []
 

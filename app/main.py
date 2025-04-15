@@ -1,13 +1,24 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from starlette.middleware.sessions import SessionMiddleware
 from app.config.settings import settings
+from app.utils.http_client import shared_http_client
 
 # Route Controllers
 from app.controllers import  auth_controller
 from app.controllers.ui import homepage_controller, message_type_ui_controller, text_ui_controller, media_ui_controller
 from app.controllers.api import text_api_controller, media_api_controller
 
-app = FastAPI(title="WhatsApp Boost Tool")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # App startup
+    print("🚀 WhatsBoost starting...")
+    yield
+    # App shutdown
+    print("🛑 WhatsBoost shutting down. Closing HTTP client...")
+    await shared_http_client.aclose()
+
+app = FastAPI(title="WhatsApp Boost Tool", lifespan=lifespan)
 
 # 🛡️ Middleware
 app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY, max_age=604800, https_only=False) # Add session middleware

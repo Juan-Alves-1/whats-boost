@@ -2,7 +2,7 @@ from fastapi import Request, HTTPException
 from app.config.settings import settings
 
 
-# Checks if the session is still valid each time a protected route is accessed
+# Authorization, not just authentication: Verifies that the user is logged in and authorized
 def auth_required(request: Request):
     user = request.session.get("user")
     if not user or user.get("email") not in settings.ALLOWED_EMAILS:

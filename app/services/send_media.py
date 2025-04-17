@@ -33,7 +33,7 @@ async def send_media_message(group_id: str, caption: str, media_url: str, file_n
     headers = {
         "apikey": settings.API_KEY,
         "Content-Type": "application/json",
-        # "User-Agent": "WhatsBoost/1.0 (http://......:8000)"
+        "User-Agent": "WhatsBoost/1.0"
     }
 
     max_retries = 3

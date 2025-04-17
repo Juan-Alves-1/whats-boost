@@ -21,7 +21,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="WhatsApp Boost Tool", lifespan=lifespan)
 
 # 🛡️ Middleware
-app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY, max_age=604800, https_only=False) # Add session middleware
+app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY, max_age=604800, https_only=False) # Secure cookie-based sessions (7 days)
 
 # 🔐 Authentication Routes
 app.include_router(auth_controller.router, tags=["Auth"])

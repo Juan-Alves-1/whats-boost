@@ -10,6 +10,13 @@ import logging
 logger = logging.getLogger("media_service")  # Name it per module
 logger.setLevel(logging.INFO)
 
+# Add this block:
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
 
 # Format timestamp for logging readability
 def format_timestamp(ts: str) -> str:

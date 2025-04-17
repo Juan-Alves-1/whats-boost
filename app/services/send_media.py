@@ -5,6 +5,10 @@ import traceback
 from datetime import datetime
 from app.config.settings import settings
 from app.utils.http_client import shared_http_client
+import logging
+
+logger = logging.getLogger("media_service")  # Name it per module
+logger.setLevel(logging.INFO)
 
 
 # Format timestamp for logging readability
@@ -47,27 +51,26 @@ async def send_media_message(group_id: str, caption: str, media_url: str, file_n
                 msg_id = key.get("id", "N/A")
                 timestamp = format_timestamp(data.get("messageTimestamp", "N/A"))
                 status = data.get("status", "UNKNOWN")
-                print(f"✅ Message sent to group ID: {group_id} | Message ID: {msg_id} at {timestamp} | EVO status: {status}")
+                logger.info(f"✅ Message sent to group ID: {group_id} | Message ID: {msg_id} at {timestamp} | EVO status: {status}")
                 return {"group_id": group_id, "success": True}
             
             elif response.status_code == 400:
-                print(f"🔁 Status: 400 | Group ID: {group_id}, attempt {attempt + 1}/{max_retries}. Retrying...")
-                print(f"Response: {response.text}")
+                logger.warning(f"🔁 Status: 400 | Group ID: {group_id}, attempt {attempt + 1}/{max_retries}. Retrying... | Response: {response.text}")
                 await asyncio.sleep(2 ** attempt + 1)
                 continue
 
             else:
-                print(f"🟡 Unexpected response for group ID: {group_id} | Status code: {response.status_code} | Reason: {response.reason_phrase} \n Headers: {response.headers}")
+                logger.warning(f"🟡 Unexpected response for group ID: {group_id} | Status code: {response.status_code} | Reason: {response.reason_phrase} \n Headers: {response.headers}")
                 return {"group_id": group_id, "success": False, "response": response.text}
 
         except httpx.ReadTimeout:
-            print(f"⏱️ TIMEOUT for {group_id} — EVO took too long to respond.")
+            logger.warning(f"⏱️ TIMEOUT for {group_id} — EVO took too long to respond.")
             return {"group_id": group_id, "success": False, "error": "timeout"}
         except Exception as e:
-            print(f"❌ {group_id} | Exception: {str(e)}")
+            logger.exception(f"❌ {group_id} | Exception: {str(e)}")
             return {"group_id": group_id, "success": False, "error": str(e)}
         
-    print(f"❌ Group ID: {group_id} | All {max_retries} retries failed with status 400.")
+    logger.exception(f"❌ Group ID: {group_id} | All {max_retries} retries failed with status 400.")
     return {"group_id": group_id, "success": False, "error": "Max retries exceeded"}
 
 # Schedule media tasks with staggered delay

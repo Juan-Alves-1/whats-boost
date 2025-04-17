@@ -81,7 +81,7 @@ async def send_media_message(group_id: str, caption: str, media_url: str, file_n
     return {"group_id": group_id, "success": False, "error": "Max retries exceeded"}
 
 # Schedule media tasks with staggered delay
-async def send_group_media_messages(group_ids: list[str], caption: str, media_url: str, file_name: str, min_delay_sec: int = 25, max_delay_sec: int = 35, mediatype: str = "image", mimetype: str = "image/jpg"):
+async def send_group_media_messages(group_ids: list[str], caption: str, media_url: str, file_name: str, min_delay_sec: int = 18, max_delay_sec: int = 25, mediatype: str = "image", mimetype: str = "image/jpg"):
     total_server_delay = 0
     tasks = []
 

@@ -20,15 +20,14 @@ class BulkMediaRequest(BaseModel):
     mimetype: str
 
 @router.post("/api/v1/messages/media", name="send_media_ui")
-async def send_bulk_media_ui(request: Request , message_text: str = Form(...), image_url: str = Form(...), image_name: str = Form(...), user=Depends(auth_required)):
+async def send_bulk_media_ui(request: Request , message_text: str = Form(...), image_url: str = Form(...), user=Depends(auth_required)):
     try:
         group_ids = list(GROUP_IDS.values()) # Gets all test group IDs
         # Quick solution to launch the batch in the background
         asyncio.create_task(send_group_media_messages(
             group_ids=group_ids,
             caption=message_text,
-            media_url=image_url,
-            file_name=image_name
+            media_url=image_url
         ))
         # Redirect to GET with query param so user doesn't re-submit 
         # request.url_for(...) returns a Starlette URL object, not a plain string

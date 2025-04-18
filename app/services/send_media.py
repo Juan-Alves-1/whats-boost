@@ -25,7 +25,7 @@ def format_timestamp(ts: str) -> str:
     except Exception:
         return "Invalid timestamp"
 
-# Send media to a single group with EVO-API and staggered server delay
+# Send media message {photo + message} to a single group with EVO-API and staggered server delay
 async def send_media_message(group_id: str, caption: str, media_url: str, evo_delay_ms: int, server_delay_sec: int, mediatype: str, mimetype: str):
     await asyncio.sleep(server_delay_sec)
 
@@ -36,7 +36,6 @@ async def send_media_message(group_id: str, caption: str, media_url: str, evo_de
         "mimetype": mimetype,
         "caption": caption,
         "media": media_url,
-        # "fileName": file_name, Omit for now since: only required for documents (i.e. PDF)
         "delay": evo_delay_ms,
         "linkPreview": True,
         "mentionsEveryOne": False
@@ -81,7 +80,7 @@ async def send_media_message(group_id: str, caption: str, media_url: str, evo_de
     return {"group_id": group_id, "success": False, "error": "Max retries exceeded"}
 
 # Schedule media tasks with staggered delay
-async def send_group_media_messages(group_ids: list[str], caption: str, media_url: str, min_delay_sec: int = 18, max_delay_sec: int = 25, mediatype: str = "image", mimetype: str = "image/jpg"):
+async def send_group_media_messages(group_ids: list[str], caption: str, media_url: str, min_delay_sec: int, max_delay_sec:int, mediatype: str, mimetype: str):
     total_server_delay = 0
     tasks = []
 
@@ -95,7 +94,6 @@ async def send_group_media_messages(group_ids: list[str], caption: str, media_ur
             group_id=group_id,
             caption=caption,
             media_url=media_url,
-            # file_name=file_name,
             evo_delay_ms=evo_typing_delay_ms,
             server_delay_sec=total_server_delay,
             mediatype=mediatype,

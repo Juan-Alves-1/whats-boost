@@ -8,6 +8,7 @@ MediaType = Annotated[str, StringConstraints(to_lower=True)]
 MimeType = Annotated[str, StringConstraints(to_lower=True)]
 Delay = Annotated[int, Field(ge=10, le=60)]
 
+# Deterministic and free of I/O and side effects 
 class bulk_media_payload(BaseModel):
     group_ids: List[GroupID]
     caption: Caption

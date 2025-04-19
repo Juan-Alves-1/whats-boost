@@ -1,9 +1,10 @@
 from fastapi import APIRouter, HTTPException, Depends, Request, Form
 from fastapi.responses import RedirectResponse
-from app.services.send_media import send_group_media_messages
 from app.dependencies.auth import auth_required
-from app.config.group_map import GROUP_IDS
 from app.schemas.message import bulk_media_payload
+from app.config.group_map import GROUP_IDS
+from app.utils.media_validation import is_image_url
+from app.services.send_media import send_group_media_messages
 import asyncio
 
 router = APIRouter()
@@ -17,6 +18,9 @@ async def send_bulk_media_ui(request: Request , message_text: str = Form(...), i
             caption=message_text,
             media_url=image_url 
         )
+        
+        if not await is_image_url(payload.media_url):
+            raise HTTPException(status_code=400, detail="Provided media_url is not an image.")
 
         # Quick solution to launch the batch in the background
         asyncio.create_task(send_group_media_messages(

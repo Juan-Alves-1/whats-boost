@@ -24,10 +24,14 @@
       <form method="post" action="{{ form_action }}">
         <!-- Text Message -->
         <textarea name="message_text"
+                  minlength="15" 
+                  maxlength="400"
                   required
                   placeholder="Type your message here..."
-                  class="w-full h-24 p-2 rounded bg-[#f4f1ea] font-mono resize-none focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                  class="w-full h-44 mt-1 p-2 rounded bg-[#f4f1ea] font-mono auto-resize focus:outline-none focus:ring-2 focus:ring-yellow-400"
         ></textarea>
+
+        <p class="text-xs text-gray-600 mt-1" id="char-count">0 / 400</p>
 
         <!-- Image URL -->
         <div class="mt-4 text-left text-sm font-semibold text-gray-700">Image URL</div>
@@ -35,10 +39,10 @@
                name="image_url"
                placeholder="https://example.com/image.jpg"
                required
-               class="w-full mt-1 p-2 rounded bg-[#f4f1ea] font-mono focus:outline-none focus:ring-2 focus:ring-yellow-400"
+               class="w-full max-w-xl mt-1 p-2 rounded bg-[#f4f1ea] font-mono focus:outline-none focus:ring-2 focus:ring-yellow-400"
         />
 
-        <!-- Image Name: only required for documents (i.e. PDF) 
+        <!-- File Name: only required for documents (i.e. PDF) 
         <div class="mt-4 text-left text-sm font-semibold text-gray-700">Image Name</div>
         <input type="text"
                name="image_name"
@@ -55,6 +59,16 @@
         </button>
       </form>
     {% endif %}
+
+    <script>
+      const textarea = document.querySelector('textarea[name="message_text"]');
+      const counter = document.getElementById("char-count");
+    
+      textarea.addEventListener("input", () => {
+        counter.textContent = `${textarea.value.length} / 400`;
+      });
+    </script>
+
   </div>
 
 </body>

@@ -3,8 +3,10 @@ from fastapi.responses import RedirectResponse
 from app.dependencies.auth import auth_required
 from app.schemas.message import bulk_media_payload
 from app.config.group_map import GROUP_IDS
+from app.utils.media_limiter import can_run_batch, get_remaining_delay
 from app.utils.media_validation import is_image_url
 from app.services.send_media import send_group_media_messages
+
 import asyncio
 
 router = APIRouter()
@@ -19,6 +21,16 @@ async def send_bulk_media_ui(request: Request , message_text: str = Form(...), i
             media_url=image_url 
         )
         
+        # Allow a new batch only after finishing the previous one
+        estimated_duration = len(payload.group_ids) * payload.max_delay_sec
+        if not await can_run_batch(estimated_duration):
+            remaining = get_remaining_delay()
+            raise HTTPException(
+                status_code=429,
+                detail=f"A media batch is already running. Try again in ~{remaining} seconds."
+            )
+        
+        # Validate media_url before creating tasks
         if not await is_image_url(payload.media_url):
             raise HTTPException(status_code=400, detail="Provided media_url is not an image.")
 

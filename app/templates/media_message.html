@@ -52,7 +52,8 @@
         -->
 
         <!-- Submit -->
-        <button type="submit"
+        <button type="button" 
+                onclick="confirmSubmit(this.form)"
                 class="mt-6 w-full bg-[#f7c948] hover:bg-yellow-400 text-black font-bold py-2 px-4 rounded transition"
         >
           Send
@@ -60,6 +61,7 @@
       </form>
     {% endif %}
 
+    <!-- Count the characters while typing -->
     <script>
       const textarea = document.querySelector('textarea[name="message_text"]');
       const counter = document.getElementById("char-count");
@@ -67,6 +69,18 @@
       textarea.addEventListener("input", () => {
         counter.textContent = `${textarea.value.length} / 400`;
       });
+    </script>
+
+    <!-- Confirmation message before submitting form -->
+    <script>
+      function confirmSubmit(form) {
+        const userConfirmed = confirm("Are you sure you want to send this message?");
+        if (userConfirmed) {
+          form.submit(); // Manually trigger the form submission
+        } else {
+          alert("No problem! You can keep editing your message 🙂");
+        }
+      }
     </script>
 
   </div>

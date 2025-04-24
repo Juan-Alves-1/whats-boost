@@ -7,16 +7,30 @@ from app.config.settings import settings
 from app.utils.http_client import shared_http_client
 import logging
 
+
 logger = logging.getLogger("media_service")  # Name it per module
 logger.setLevel(logging.INFO)
 
-# Add this block:
 if not logger.handlers:
     handler = logging.StreamHandler()
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
     handler.setFormatter(formatter)
     logger.addHandler(handler)
 
+# Auxilary function for dynamic EVO API presence (delay)
+# characters per second
+average_typer = 6 
+fast_typer = 9 
+super_typer = 12
+copy_paste_typer = 16
+def get_typing_range_ms(caption) -> tuple:
+    length = len(caption)
+    try: 
+        min_time = (length / copy_paste_typer) * 1000
+        max_time = (length / super_typer) * 1000
+        return round(min_time), round(max_time)
+    except Exception:
+        return "Unable to get dynamic WhatsApp presence"
 
 # Format timestamp for logging readability
 def format_timestamp(ts: str) -> str:
@@ -81,13 +95,14 @@ async def send_media_message(group_id: str, caption: str, media_url: str, evo_de
 
 # Schedule media tasks with staggered delay
 async def send_group_media_messages(group_ids: list[str], caption: str, media_url: str, min_delay_sec: int, max_delay_sec:int, mediatype: str, mimetype: str):
-    total_server_delay = 0
     tasks = []
+    total_server_delay = 0
+    buffer_between = 1
+    min_typing_delay_ms, max_typing_delay_ms = get_typing_range_ms(caption)
 
     for group_id in group_ids:
-        evo_typing_delay_ms = random.randint(min_delay_sec * 1000, max_delay_sec * 1000)
-        delay_gap = random.randint(min_delay_sec, max_delay_sec)
-        total_server_delay += delay_gap
+        evo_typing_delay_ms = random.randint(min_typing_delay_ms, max_typing_delay_ms)
+        evo_typing_delay_sec = evo_typing_delay_ms / 1000
         print(f"📝 Scheduling media to {group_id} in {total_server_delay}s")
 
         task = asyncio.create_task(send_media_message(
@@ -100,6 +115,7 @@ async def send_group_media_messages(group_ids: list[str], caption: str, media_ur
             mimetype=mimetype
         ))
         tasks.append(task)
+        total_server_delay += evo_typing_delay_sec + buffer_between
 
     print("🚀 All media tasks scheduled. Awaiting execution...\n")
 

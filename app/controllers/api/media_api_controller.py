@@ -3,6 +3,7 @@ from fastapi.responses import RedirectResponse
 from app.dependencies.auth import auth_required
 from app.schemas.message import bulk_media_payload
 from app.config.group_map import GROUP_IDS
+from app.utils.media_helpers import get_typing_range_ms
 from app.utils.media_limiter import can_run_batch, get_remaining_delay
 from app.utils.media_validation import is_image_url
 from app.services.send_media import send_group_media_messages
@@ -22,7 +23,7 @@ async def send_bulk_media_ui(request: Request , message_text: str = Form(...), i
         )
         
         # Allow a new batch only after finishing the previous one
-        estimated_duration = len(payload.group_ids) * payload.max_delay_sec
+        estimated_duration = len(payload.group_ids) * (max(get_typing_range_ms(payload.caption)) / 1000)
         if not await can_run_batch(estimated_duration):
             remaining = get_remaining_delay()
             raise HTTPException(

@@ -1,43 +1,11 @@
 import asyncio
 import random
 import httpx
-import traceback
-from datetime import datetime
 from app.config.settings import settings
+from app.utils.media_helpers import get_typing_range_ms
 from app.utils.http_client import shared_http_client
-import logging
-
-
-logger = logging.getLogger("media_service")  # Name it per module
-logger.setLevel(logging.INFO)
-
-if not logger.handlers:
-    handler = logging.StreamHandler()
-    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-
-# Auxilary function for dynamic EVO API presence (delay)
-# characters per second
-average_typer = 6 
-fast_typer = 9 
-super_typer = 12
-copy_paste_typer = 16
-def get_typing_range_ms(caption) -> tuple:
-    length = len(caption)
-    try: 
-        min_time = (length / copy_paste_typer) * 1000
-        max_time = (length / super_typer) * 1000
-        return round(min_time), round(max_time)
-    except Exception:
-        return "Unable to get dynamic WhatsApp presence"
-
-# Format timestamp for logging readability
-def format_timestamp(ts: str) -> str:
-    try:
-        return datetime.fromtimestamp(int(ts)).strftime('%Y-%m-%d %H:%M:%S')
-    except Exception:
-        return "Invalid timestamp"
+from app.utils.time_formatter import format_timestamp
+from app.utils.logger import logger
 
 # Send media message {photo + message} to a single group with EVO-API and staggered server delay
 async def send_media_message(group_id: str, caption: str, media_url: str, evo_delay_ms: int, server_delay_sec: int, mediatype: str, mimetype: str):
@@ -120,10 +88,9 @@ async def send_group_media_messages(group_ids: list[str], caption: str, media_ur
     print("🚀 All media tasks scheduled. Awaiting execution...\n")
 
     try:
-        results = await asyncio.gather(*tasks, return_exceptions=True) # Manually handles failed results to avoid crashing the entire endpoint
-        print("\n✅ All media tasks completed.\n")
+        results = await asyncio.gather(*tasks, return_exceptions=True) # Manually handles failed results 
+        logger.info("\n✅ All media tasks completed.\n")
     except Exception as e:
-        print(f"❌ BATCH ERROR: {str(e)}")
-        traceback.print_exc()
-        results = []
+        logger.exception(f"❌ BATCH ERROR: {str(e)}")
+        results = [] # Return an empty list instead of crashing the endpoint
     return results

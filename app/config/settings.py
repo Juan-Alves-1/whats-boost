@@ -10,7 +10,10 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_ID: str
     GOOGLE_CLIENT_SECRET: str
     SECRET_KEY: str
-    ALLOWED_EMAILS: List[str] # Needs to be fixed in order to accommodate more emails
+    ALLOWED_EMAILS: List[str] 
+    CLOUDINARY_CLOUD_NAME: str
+    CLOUDINARY_API_KEY: str
+    CLOUDINARY_API_SECRET: str
 
     class Config:
         env_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '.env'))

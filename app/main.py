@@ -8,7 +8,7 @@ from app.utils.logger import logger
 # Route Controllers
 from app.controllers import  auth_controller
 from app.controllers.ui import homepage_controller, message_type_ui_controller, text_ui_controller, media_ui_controller
-from app.controllers.api import text_api_controller, media_api_controller
+from app.controllers.api import text_api_controller, media_api_controller, image_up_api_controller
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -36,4 +36,6 @@ app.include_router(media_ui_controller.router, tags=["UI"]) # Show form for medi
 # 🚀 API Routes (JSON)
 app.include_router(text_api_controller.router, tags=["API"]) # Fire text messages
 app.include_router(media_api_controller.router, tags=["API"]) # Fire media messages
+
+app.include_router(image_up_api_controller.router, tags=["Image Upload"]) # Upload image to the provider
 

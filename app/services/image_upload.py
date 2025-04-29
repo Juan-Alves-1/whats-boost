@@ -15,7 +15,19 @@ async def upload_image(file_bytes: bytes, public_id: str = None) -> str:
     """
     Uploads image bytes to Cloudinary and returns the secure URL.
     """
-    upload_options = {"folder": "whats_boost_uploads"}
+    upload_options = {
+        "asset_folder": "whats_boost_uploads",
+        "transformation": [
+            {
+                "width": 1080,
+                "height": 1080,
+                "crop": "pad",
+                "background": "white",
+                "quality": "auto",
+                "fetch_format": "auto"
+            }
+        ]
+    }
     if public_id:
         upload_options["public_id"] = public_id
 

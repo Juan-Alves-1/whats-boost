@@ -15,9 +15,14 @@
 
     {% if success %}
       <!-- Confirmation shown -->
-      <div class="mb-4 px-4 py-2 rounded bg-[#f4f1ea] text-green-800 text-sm font-semibold shadow">
+      <div class="mb-6 px-4 py-2 rounded bg-[#f4f1ea] text-black-800 text-sm font-semibold shadow">
         {{ Result }}
       </div>
+      <a href="/choose"
+        class="text-blue-600 text-sm underline hover:text-blue-800 transition"
+      >
+        Send another message
+      </a>  
     <!-- Display form only if message not yet sent -->
     {% else %}
     

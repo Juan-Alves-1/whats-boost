@@ -13,6 +13,6 @@ async def show_media_form(request: Request, user=Depends(auth_required)):
         "request": request,
         "form_action": request.url_for("send_media_ui"),
         "success": sent,  # flag to show confirmation
-        "Result": "The messages were scheduled!"
+        "Result": "The messages were scheduled 😃"
     })
 

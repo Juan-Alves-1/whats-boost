@@ -1,4 +1,3 @@
-
 GROUP_IDS = {
     "Novos Produtos 198": "120363354453527928@g.us",
     "Novos Produtos 78": "120363315916203948@g.us",
@@ -43,7 +42,6 @@ GROUP_IDS = {
     "Promos e cupons🚨": "120363419126831907@g.us",
     "Amazon promos": "120363418292455597@g.us",
     "Novos produtos 1000": "120363419494197418@g.us",
-    "Grupo alertas promos": "120363417087611923@g.us"
-
-
+    "Grupo alertas promos": "120363417087611923@g.us",
+    "Novos Produtos 5": "120363380545173486@g.us"
 }

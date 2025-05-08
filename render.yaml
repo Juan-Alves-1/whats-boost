@@ -1,0 +1,69 @@
+services:
+  - type: web
+    name: fastapi-app
+    env: docker
+    plan: free
+    autoDeploy: true
+    buildCommand: docker build -t fastapi-app .
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    envVars:
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: redis
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: redis
+          name: redis
+      - key: CELERY_RESULT_BACKEND
+        fromService:
+          type: redis
+          name: redis
+      - key: SECRET_KEY
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: EVO_C_URL
+        sync: false
+      - key: INSTANCE_ID
+        sync: false
+      - key: API_KEY
+        sync: false
+
+  - type: worker
+    name: celery-worker
+    env: docker
+    plan: starter
+    buildCommand: docker build -t celery-worker .
+    startCommand: celery -A celery_worker.celery worker --loglevel=info --pool=prefork -Q scheduler,media -E
+    envVars:
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: redis
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: redis
+          name: redis
+      - key: CELERY_RESULT_BACKEND
+        fromService:
+          type: redis
+          name: redis
+      - key: SECRET_KEY
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: EVO_C_URL
+        sync: false
+      - key: INSTANCE_ID
+        sync: false
+      - key: API_KEY
+        sync: false
+
+databases:
+  - name: redis
+    type: redis

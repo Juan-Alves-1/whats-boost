@@ -10,5 +10,9 @@ Jinja2
 typing
 asyncio
 python-multipart
+python-dotenv
 bleach
 cloudinary
+redis
+celery[redis]
+

@@ -1,6 +1,6 @@
 import httpx
 
-shared_http_client = httpx.AsyncClient(
+shared_http_client = httpx.Client(
     http2=True, 
     timeout=httpx.Timeout(
         connect=10.0,   # Time to establish TCP connection

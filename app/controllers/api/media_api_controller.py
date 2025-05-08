@@ -3,10 +3,9 @@ from fastapi.responses import RedirectResponse
 from app.dependencies.auth import auth_required
 from app.schemas.message import bulk_media_payload
 from app.config.group_map import GROUP_IDS
-from app.utils.media_helpers import get_typing_range_ms
-from app.utils.media_limiter import can_run_batch, get_remaining_delay
 from app.utils.media_validation import is_image_url
-from app.services.send_media import send_group_media_messages
+from app.tasks.batch_queue import enqueue_user_media_batch
+from app.utils.logger import logger
 
 import asyncio
 
@@ -21,30 +20,16 @@ async def send_bulk_media_ui(request: Request , message_text: str = Form(...), i
             caption=message_text,
             media_url=image_url 
         )
-        
-        # Allow a new batch only after finishing the previous one
-        estimated_duration = len(payload.group_ids) * (max(get_typing_range_ms(payload.caption)) / 1000)
-        if not await can_run_batch(estimated_duration):
-            remaining = get_remaining_delay()
-            raise HTTPException(
-                status_code=429,
-                detail=f"A media batch is already running. Try again in ~{remaining} seconds."
-            )
-        
-        # Validate media_url before creating tasks
-        if not await is_image_url(payload.media_url):
-            raise HTTPException(status_code=400, detail="Provided media_url is not an image.")
 
-        # Quick solution to launch the batch in the background
-        asyncio.create_task(send_group_media_messages(
-            group_ids=payload.group_ids,
-            caption=payload.caption,
-            media_url=payload.media_url,
-            min_delay_sec=payload.min_delay_sec,
-            max_delay_sec=payload.max_delay_sec,
-            mediatype=payload.mediatype,
-            mimetype=payload.mimetype
-        ))
+        payload_dict = payload.model_dump()
+        payload_dict["user_email"] = user["email"]
+
+        # Validate media_url before creating tasks
+        if not is_image_url(payload.media_url):
+            raise HTTPException(status_code=400, detail="Provided media_url is not an image.")
+            
+        # Enqueue task via Celery for queue management
+        enqueue_user_media_batch.delay(payload_dict)
         
         # Redirect user to prevent resubmission
         redirect_url = str(request.url_for("show_media_form")) + "?sent=true" # request.url_for(...) returns a Starlette URL object, not a plain string

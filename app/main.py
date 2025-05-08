@@ -15,9 +15,9 @@ async def lifespan(app: FastAPI):
     # App startup
     logger.info("🚀 WhatsBoost starting...")
     yield
-    # App shutdown
-    logger.info("🛑 WhatsBoost shutting down. Closing HTTP client...")
-    await shared_http_client.aclose()
+    # App shutdown 
+    #logger.info("🛑 WhatsBoost shutting down. Closing HTTP client...")
+    #await shared_http_client.aclose()
 
 app = FastAPI(title="WhatsApp Boost Tool", lifespan=lifespan)
 

@@ -33,10 +33,10 @@ services:
         sync: false
 
   - type: worker
-    name: celery-worker
+    name: celery_worker
     env: docker
     plan: starter
-    buildCommand: docker build -t celery-worker .
+    buildCommand: docker build -t celery_worker .
     startCommand: celery -A celery_worker.celery worker --loglevel=info --pool=prefork -Q scheduler,media -E
     envVars:
       - key: REDIS_URL

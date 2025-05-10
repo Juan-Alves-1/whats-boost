@@ -108,13 +108,15 @@ def send_user_media_batch(payload: dict): # rename to enqueue
                 group_id, caption, media_url, evo_delay, mediatype, mimetype
             ).apply_async(countdown=delay_sec)  # run task x seconds after queueing
 
-            total_server_delay += (evo_delay // 1000) + inter_message_buffer 
+            total_server_delay += (evo_delay // 1000) + inter_message_buffer # following task receives the previous delay set
         
         logger.info(f"⏱️ Estimated total batch time for {len(group_ids)} groups: {int(total_server_delay)}s")
+
+        estimated_lock_time = total_server_delay + 30
         logger.info(f"🔓 Scheduling lock release in {int(total_server_delay)} seconds for user {email}")
-        
-        release_and_check_queue.apply_async(args=[email], countdown=total_server_delay) # Lock is only released when all subtasks finish (so no overlaps)
-        return f"Sent the total of {len(group_ids)} subtasks for user {email}"
+
+        release_and_check_queue.apply_async(args=[email], countdown=estimated_lock_time) # Lock is expected to be reased when all subtasks finish (so no overlaps)
+        return f"Scheduled the total of {len(group_ids)} subtasks for user {email}"
     
     except Exception as e:
         logger.exception(f"❌ Error while processing batch for {email}: {str(e)}")

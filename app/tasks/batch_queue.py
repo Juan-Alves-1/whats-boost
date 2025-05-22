@@ -40,7 +40,9 @@ def enqueue_user_media_batch(payload: dict):
     try: 
         max_delay_ms = max(get_typing_range_ms(payload["caption"]) or [3000])  # default fallback to 2s  
         max_delay_s = int(max_delay_ms / 1000)
-        estimated_batch_duration_s = len(payload["group_ids"]) * (max_delay_s)
+        length_of_groups = len(payload["group_ids"])
+        total_buffer = 1 * length_of_groups
+        estimated_batch_duration_s = (length_of_groups * max_delay_s) + total_buffer
         lock_ttl = estimated_batch_duration_s + 30
 
         if get_user_lock_status(email):
@@ -91,31 +93,30 @@ def send_user_media_batch(payload: dict): # rename to enqueue
     email = payload["user_email"]
 
     try:
-        # A list of task signatures created using .si(...)
-        chain_subtasks = []
 
         total_server_delay = 0
+        inter_message_buffer = 1
         min_delay_ms, max_delay_ms = get_typing_range_ms(caption)
 
+        logger.info(f"⛓️ Dispatching {len(group_ids)} subtasks with staggered delays")
         for group_id in group_ids:
             evo_delay = random.randint(min_delay_ms, max_delay_ms)
             delay_sec = total_server_delay
-            
-            # Create a "subtask" with a celery task immutable signature
-            # It doesn’t execute yet — just defines what should be done in the chain
-            subtask = send_media_message_subtask.si(
+            # Pre-build each "subtask" with immutable signature
+            # Kick execution off of each subtask following their respective countdown
+            send_media_message_subtask.si(
                 group_id, caption, media_url, evo_delay, mediatype, mimetype
-            ).set(countdown=delay_sec)  # run task x seconds after queueing
+            ).apply_async(countdown=delay_sec)  # run task x seconds after queueing
 
-            chain_subtasks.append(subtask)
-            total_server_delay += evo_delay / 1000 + 1  # +1s buffer
+            total_server_delay += (evo_delay // 1000) + inter_message_buffer # following task receives the previous delay set
         
-        logger.info(f"⛓️  Dispatching a batch of {len(chain_subtasks)} subtasks")
+        logger.info(f"⏱️ Estimated total batch time for {len(group_ids)} groups: {int(total_server_delay)}s")
 
-        from celery import chain
-        # execute tasks in strict sequence: chain() builds, apply_async() kicks it off
-        full_chain = chain(*chain_subtasks, release_and_check_queue.si(email)) # Lock is only released when all subtasks finish (so no overlaps)
-        return full_chain.apply_async()
+        estimated_lock_time = total_server_delay + 30
+        logger.info(f"🔓 Scheduling lock release in {int(total_server_delay)} seconds for user {email}")
+
+        release_and_check_queue.apply_async(args=[email], countdown=estimated_lock_time) # Lock is expected to be reased when all subtasks finish (so no overlaps)
+        return f"Scheduled the total of {len(group_ids)} subtasks for user {email}"
     
     except Exception as e:
         logger.exception(f"❌ Error while processing batch for {email}: {str(e)}")

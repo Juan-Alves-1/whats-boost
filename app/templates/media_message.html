@@ -26,27 +26,45 @@
     <!-- Display form only if message not yet sent -->
     {% else %}
     
-      <!-- Upload Image Form -->
-      <form action="/api/v1/images/upload" method="post" enctype="multipart/form-data" class="mt-6" id="upload-form">
-        <div class="text-left text-sm font-semibold text-gray-700 mb-1"> Select an image from your device </div>
-        <label for="file-input" class="inline-block cursor-pointer px-4 py-2 bg-[#f4f1ea] text-sm font-mono rounded hover:bg-[#eae6dc] transition">
-          Choose a file...
-        </label>
-
-        <input type="file"
-              name="file"
-              accept="image/*"
-              id="file-input"
-              class="hidden"
-        />
-
-        <button type="submit"
-                class="mt-4 bg-[#fff3c4] hover:bg-yellow-300/50 text-black py-1 px-3 rounded transition text-sm"
-        >
-          Upload image
-        </button>
-      </form>
-      <br>
+    <div class="mt-6">
+      <div class="text-left text-sm font-semibold text-gray-700 mb-1">
+        Select an image from your device
+      </div>
+    
+      <div class="flex justify-center gap-4">
+        <!-- Without logo -->
+        <form class="flex items-center space-x-2" enctype="multipart/form-data" id="upload-form-no-logo">
+          <label for="file-input-no-logo"
+                 id="file-label-no-logo"
+                 class="bg-[#fff3c4] hover:bg-yellow-300/50 text-black py-1 px-3 rounded transition text-sm cursor-pointer">
+            Upload without logo
+          </label>
+          <input type="file"
+                 name="file"
+                 accept="image/*"
+                 id="file-input-no-logo"
+                 class="hidden"
+                 required />
+        </form>
+    
+        <!-- With logo -->
+        <form class="flex items-center space-x-2" enctype="multipart/form-data" id="upload-form-with-logo">
+          <label for="file-input-with-logo"
+                 id="file-label-with-logo"
+                 class="bg-[#fff3c4] hover:bg-yellow-300/50 text-black py-1 px-3 rounded transition text-sm cursor-pointer">
+            Upload with logo
+          </label>
+          <input type="file"
+                 name="file"
+                 accept="image/*"
+                 id="file-input-with-logo"
+                 class="hidden"
+                 required />
+        </form>
+      </div>
+    
+      <p id="upload-status" class="mt-2 text-sm text-gray-600"></p>
+    </div>
 
       <!-- Payload form -->
       <div class="mt-4 text-left text-sm font-semibold text-gray-700">Message</div>
@@ -104,56 +122,58 @@
       }
     </script>
 
-    <!-- Provide image URL after uploading the image without a redirect -->
+    <!-- Upload image connection with API -->
     <script>
-      const fileInput = document.getElementById('file-input');
-      const uploadForm = document.getElementById('upload-form');
-      const fileLabel = document.querySelector('label[for="file-input"]');
-    
-      // 1. When a file is selected
-      fileInput.addEventListener('change', () => {
-        if (fileInput.files.length > 0) {
-          fileLabel.textContent = 'File selected';
-        } else {
-          fileLabel.textContent = 'Choose a file...'; // fallback if they unselect
-        }
-      });
-    
-      // 2. When form is submitted
-      uploadForm.addEventListener('submit', async (event) => {
-        event.preventDefault(); // Prevent the normal page reload
-    
-        const file = fileInput.files[0];
-        if (!file) {
-          alert("Please select a file!");
-          return;
-        }
-    
-        const formData = new FormData();
-        formData.append('file', file);
-    
-        try {
-          const response = await fetch('/api/v1/images/upload', {
-            method: 'POST',
-            body: formData
-          });
-    
-          if (!response.ok) {
-            throw new Error('Upload failed');
+      const statusMessage = document.getElementById('upload-status');
+
+      function handleUpload(fileInputId, labelId, endpoint) {
+        const fileInput = document.getElementById(fileInputId);
+        const label = document.getElementById(labelId);
+
+        fileInput.addEventListener('change', async () => {
+          const file = fileInput.files[0];
+          if (!file) {
+            label.textContent = labelId.includes("with") ? "Upload with logo" : "Upload without logo";
+            return;
           }
-    
-          const data = await response.json();
-          alert('Image uploaded successfully! URL: ' + data.image_url);
-    
-          fileLabel.textContent = 'File uploaded'; 
-    
-          // Auto-fill another form field with the image URL
-          document.getElementById('image-url-field').value = data.image_url;
-    
-        } catch (error) {
-          alert('Error uploading image: ' + error.message);
-        }
-      });
+
+          label.textContent = 'Uploading...';
+          label.classList.add('opacity-50', 'cursor-not-allowed');
+          label.style.pointerEvents = 'none';
+          statusMessage.textContent = '';
+
+          const formData = new FormData();
+          formData.append('file', file);
+
+          try {
+            const response = await fetch(endpoint, {
+              method: 'POST',
+              body: formData
+            });
+
+            if (!response.ok) throw new Error('Upload failed');
+
+            const data = await response.json();
+            label.textContent = '✅ Uploaded';
+            statusMessage.textContent = 'Image URL added below.';
+            document.getElementById('image-url-field').value = data.image_url;
+            label.classList.add('opacity-50', 'cursor-not-allowed');
+            label.style.pointerEvents = 'none';
+
+          } catch (error) {
+            label.textContent = '❌ Upload failed';
+            statusMessage.textContent = 'Please try again.';
+            label.classList.remove('opacity-50', 'cursor-not-allowed');
+            label.style.pointerEvents = 'auto';
+          } 
+        });
+      }
+
+      handleUpload('file-input-no-logo', 'file-label-no-logo', '/api/v1/images/upload');
+      handleUpload('file-input-with-logo', 'file-label-with-logo', '/api/v1/images/upload-with-logo');
+      
+      // Auto-fill another form field with the image URL
+      document.getElementById('image-url-field').value = data.image_url;
     </script>
 
   </div>

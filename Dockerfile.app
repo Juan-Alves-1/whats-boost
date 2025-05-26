@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.11-slim AS base
 
 # Create a non-root user and group
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
@@ -18,5 +18,10 @@ RUN chown -R appuser:appgroup /app
 # Switch to the non-root user
 USER appuser
 
-CMD ["bash"]
-# locally only # CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+FROM base AS development
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+FROM base AS production
+
+CMD ["bash"] 

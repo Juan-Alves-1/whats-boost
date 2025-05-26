@@ -1,0 +1,27 @@
+FROM python:3.11-slim AS base
+
+# Create a non-root user and group
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
+
+WORKDIR /app
+
+# Install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy app code
+COPY . .
+
+# Change ownership of the app directory to the new user
+RUN chown -R appuser:appgroup /app
+
+# Switch to the non-root user
+USER appuser
+
+FROM base AS development
+
+CMD ["celery", "-A", "celery_worker.celery", "worker", "--loglevel=info", "--pool=prefork", "-Q", "scheduler,media", "-E", "--concurrency=2", "--max-tasks-per-child=500", "--prefetch-multiplier=2"]
+
+FROM base AS production
+
+CMD ["celery", "-A", "celery_worker.celery", "worker", "--loglevel=info", "--pool=prefork", "-Q", "scheduler,media", "-E", "--concurrency=2", "--max-tasks-per-child=500", "--prefetch-multiplier=2"]

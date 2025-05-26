@@ -122,7 +122,7 @@
       }
     </script>
 
-    <!-- Upload image connection with API -->
+    <!-- Upload image UI and API request -->
     <script>
       const statusMessage = document.getElementById('upload-status');
 
@@ -155,7 +155,7 @@
 
             const data = await response.json();
             label.textContent = '✅ Uploaded';
-            statusMessage.textContent = 'Image URL added below.';
+            statusMessage.textContent = 'Image URL added below';
             document.getElementById('image-url-field').value = data.image_url;
             label.classList.add('opacity-50', 'cursor-not-allowed');
             label.style.pointerEvents = 'none';

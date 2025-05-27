@@ -15,4 +15,6 @@ bleach
 cloudinary
 redis
 celery[redis]
-
+psycopg[binary] # on Alpine (or other musl-based images) and some “slim” variants, no compatible wheel is available, so pip falls back to building from source
+sqlalchemy
+alembic

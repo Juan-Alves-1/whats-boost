@@ -6,7 +6,7 @@ group_by_user = Table(
     "group_by_user",
     Base.metadata,
     Column("user_id", Integer, ForeignKey("users.id"), primary_key=True),
-    Column("group_id"), Integer, ForeignKey("groups.id", primary_key=True)
+    Column("group_id", Integer, ForeignKey("groups.id"), primary_key=True)
 )
 
 class User(Base):

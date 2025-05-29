@@ -1,6 +1,5 @@
 import os
-from typing import List
-from pydantic import Field 
+from pydantic import Field, PostgresDsn
 from pydantic_settings import BaseSettings
 
 
@@ -18,6 +17,13 @@ class Settings(BaseSettings):
     REDIS_URL: str = Field(default="redis://localhost:6379/0")
     CELERY_BROKER_URL: str = Field(default="redis://localhost:6379/0")
     CELERY_RESULT_BACKEND: str = Field(default="redis://localhost:6379/0")
+    DATABASE_URL: PostgresDsn
+
+    DATABASE_HOST: str
+    DATABASE_PORT: str
+    DATABASE_USERNAME: str
+    DATABASE_PASSWORD: str
+    DATABASE_NAME: str
 
     @property # Hot fix: cast env variable to a list
     def ALLOWED_EMAILS(self) -> list[str]:

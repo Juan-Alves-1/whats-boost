@@ -2,7 +2,10 @@ services:
 
   app:
     container_name: app
-    build: .
+    build: 
+      context: . 
+      dockerfile: Dockerfile.app
+      target: development
     volumes:
       - .:/app
     ports:
@@ -11,16 +14,12 @@ services:
     env_file:
       - .env
 
-  redis:
-    container_name: redis
-    image: redis:7.2
-    ports:
-      - "6379:6379" 
-
   celery_worker:
     container_name: celery_worker
-    build: .
-    command: celery -A celery_worker.celery worker --loglevel=info --pool=prefork -Q scheduler,media -E
+    build: 
+      context: .
+      dockerfile: Dockerfile.worker
+      target: development
     volumes:
       - .:/app
     env_file:
@@ -29,6 +28,35 @@ services:
       - app
       - redis
 
+  redis:
+    container_name: redis
+    image: redis:7.2
+    ports:
+      - 6379:6379 
+  
+  db:
+    image: postgres:16
+    container_name: whatsboost-db
+    restart: always
+    ports:
+      - 5433:5432
+    shm_size: 128mb
+    environment:
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    volumes:
+      - pgdata:/var/lib/postgresql/data 
+      
+  adminer:
+    image: adminer
+    container_name: whatsboost-db-adminer
+    restart: always
+    ports:
+      - 8080:8080
+      
+volumes:
+  pgdata: 
 
   # flower:
   #  container_name: flower

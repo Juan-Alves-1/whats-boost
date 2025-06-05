@@ -14,17 +14,21 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     email = Column(String, unique=True, nullable=False)
     full_name = Column(String, unique=True, nullable=False)
-    ''' 
-    evo_instance_id = 
-    evo_api_key =
-    cloudinary_api_key =
-    cloudinary_secret_key = 
-    logo_public_id = 
-    '''
+
+    evo_instance_id = Column(String, nullable=True)
+    evo_api_key = Column(String, nullable=True)
+    cloudinary_api_key = Column(String, nullable=True)
+    cloudinary_secret_key = Column(String, nullable=True)
+    logo_public_id = Column(String, nullable=True)
+
     created_at = Column(DateTime, server_default=func.now())
     last_login = Column(DateTime, onupdate=func.now())
 
     groups = relationship("Group", secondary=group_by_user, back_populates="users")
+
+    def __init__(self, *, email: str, full_name: str):
+        self.email = email
+        self.full_name = full_name
 
 class Group(Base):
     __tablename__ = "groups"
@@ -33,4 +37,8 @@ class Group(Base):
     whatsapp_group_id = Column(String, unique=True, nullable=False)
 
     users = relationship("User", secondary=group_by_user, back_populates="groups")
+
+    def __init__(self, *, label: str, whatsapp_group_id: str):
+        self.label = label
+        self.whatsapp_group_id = whatsapp_group_id
 

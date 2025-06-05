@@ -1,5 +1,3 @@
-from fastapi import dependencies
-from sqlalchemy.orm import session
 from app.db.session import SessionLocal
 
 def get_db():

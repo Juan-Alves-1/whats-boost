@@ -2,6 +2,10 @@ from sqlalchemy import Column, Integer, String, DateTime, func, Table, ForeignKe
 from sqlalchemy.orm import relationship
 from .base import Base
 
+
+class SoftDeleteMixin:
+    deleted_at = Column(DateTime, nullable=True)
+
 group_by_user = Table(
     "group_by_user",
     Base.metadata,
@@ -9,7 +13,7 @@ group_by_user = Table(
     Column("group_id", Integer, ForeignKey("groups.id"), primary_key=True)
 )
 
-class User(Base):
+class User(Base, SoftDeleteMixin):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True)
     email = Column(String, unique=True, nullable=False)
@@ -41,4 +45,3 @@ class Group(Base):
     def __init__(self, *, label: str, whatsapp_group_id: str):
         self.label = label
         self.whatsapp_group_id = whatsapp_group_id
-

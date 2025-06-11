@@ -34,3 +34,10 @@ class UserRead(BaseModel):
 
     class Config:
         orm_mode = True
+
+class UserSoftDelete(BaseModel):
+    id: int
+    deleted_at: datetime
+
+    class Config:
+        orm_mode = True

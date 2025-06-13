@@ -34,7 +34,7 @@ class User(Base, SoftDeleteMixin):
         self.email = email
         self.full_name = full_name
 
-class Group(Base):
+class Group(Base, SoftDeleteMixin):
     __tablename__ = "groups"
     id = Column(Integer, primary_key=True)
     label = Column(String, nullable=False)

@@ -30,6 +30,9 @@ def get_record(db: Session, model_cls: Type[T], pk: int, *, include_deleted: boo
     return instance
 
 def get_all_records(db: Session, model_cls: Type[T], *, include_deleted: bool = False) -> list[T]:
+    if not is_sqlalchemy_model(model_cls):
+        raise ValueError(f"{model_cls!r} is not a recognized SQLAlchemy model.")
+    
     q = db.query(model_cls)
     if hasattr(model_cls, "deleted_at") and not include_deleted:
         q = q.filter(model_cls.deleted_at.is_(None))
@@ -57,7 +60,7 @@ def update_record(db: Session, model_cls: Type[T], pk: int, **fields) -> T:
     
     instance = db.get(model_cls, pk)
     if instance is None:
-        raise ValueError(f"No {model_cls.__tablename__} row with ID: {pk}")
+        raise ValueError(f"In the table '{model_cls.__tablename__}', no row with ID: {pk} was found")
     
     # Which columns may we update?
     mapper = inspect(model_cls)
@@ -84,7 +87,7 @@ def soft_delete_record(db: Session, model_cls: Type[T], pk: int) -> T:
     
     instance = get_record(db, model_cls, pk, include_deleted=True)
     if not instance:
-        raise ValueError(f"No {model_cls.__tablename__} row with id: {pk}")
+        raise ValueError(f"In the table {model_cls.__tablename__}, no row was found with ID: {pk}")
     instance.deleted_at = datetime.now()
 
     try:
@@ -101,5 +104,7 @@ def soft_delete_record(db: Session, model_cls: Type[T], pk: int) -> T:
 def get_user_by_email(db: Session, email: str) -> User | None:
     return db.query(User).filter(User.email == email).first()
 
+# Specific database operations for groups
+def get_group_by_whatsapp_id(db: Session, whatsapp_id: str) -> Group | None:
+    return db.query(Group).filter(Group.whatsapp_group_id == whatsapp_id).first()
 
-# get group lable by whatsapp group id

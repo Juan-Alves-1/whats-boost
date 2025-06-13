@@ -5,9 +5,6 @@ class UserCreate(BaseModel):
     email: str
     full_name: str
 
-    class Config:
-        orm_mode = True
-
 class UserUpdate(BaseModel):
     full_name: str | None = None
     evo_instance_id: str | None = None
@@ -16,9 +13,9 @@ class UserUpdate(BaseModel):
     cloudinary_secret_key: str | None = None
     logo_public_id: str | None = None
 
-    class Config:
-        extra = "ignore" # only send fields that were explicitly set
-        orm_mode = True
+    model_config = {
+        "extra": "ignore",
+    }
 
 class UserRead(BaseModel):
     id: int
@@ -32,12 +29,14 @@ class UserRead(BaseModel):
     created_at: datetime
     last_login: datetime | None
 
-    class Config:
-        orm_mode = True
-
+    model_config = {
+            "from_attributes": True,
+        }
+    
 class UserSoftDelete(BaseModel):
     id: int
     deleted_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = {
+        "from_attributes": True,
+    }

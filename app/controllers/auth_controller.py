@@ -41,7 +41,7 @@ async def unauthorized():
             </head>
             <body style="font-family: Arial, sans-serif; text-align: center; margin-top: 50px;">
                 <h1>🚫 Access Denied</h1>
-                <p>This Google account is not allowed to access this app.</p>
+                <p>This Google account is not allowed to access this </p>
                 <a href="/login">Try a different account</a>
             </body>
         </html>

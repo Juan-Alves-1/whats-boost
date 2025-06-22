@@ -66,64 +66,77 @@
       <p id="upload-status" class="mt-2 text-sm text-gray-600"></p>
     </div>
 
-      <!-- Payload form -->
-      <div class="mt-4 text-left text-sm font-semibold text-gray-700">Message</div>
-      <form method="post" action="{{ form_action }}">
-        <!-- Text Message -->
-        <textarea name="message_text"
-                  minlength="15" 
-                  maxlength="400"
-                  required
-                  placeholder="Type your message here..."
-                  class="w-full h-44 mt-1 p-2 rounded bg-[#f4f1ea] font-mono auto-resize focus:outline-none focus:ring-2 focus:ring-yellow-400"
-        ></textarea>
+    <!-- Autofill Section -->
+    <div class="mt-6 text-left text-sm font-semibold text-gray-700">Link</div>
+    <input type="text"
+           id="url_input"
+           placeholder="Paste the product link here"
+           class="w-full mt-1 mb-4 p-2 rounded bg-[#f4f1ea] font-mono focus:outline-none focus:ring-2 focus:ring-yellow-400"
+    />
 
-        <p class="text-xs text-gray-600 mt-1" id="char-count">0 / 400</p>
+    <button type="button"
+            onclick="fetchMessage()"
+            id="autofill-btn"
+            class="mb-4 w-full bg-[#e0e0e0] hover:bg-[#d6d6d6] text-black font-medium py-2 px-4 rounded transition flex items-center justify-center">
+       <span id="btn-text">Autofill Message</span>
+       <svg id="loading-spinner" class="hidden animate-spin ml-2 h-4 w-4 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+       </svg>
+    </button>
 
-        <!-- Image URL -->
-        <div class="mt-4 text-left text-sm font-semibold text-gray-700">Image URL</div>
-        <input type="url"
-               name="image_url"
-               placeholder="https://example.com/image.jpg"
-               required
-               class="w-full max-w-xl mt-1 p-2 rounded bg-[#f4f1ea] font-mono focus:outline-none focus:ring-2 focus:ring-yellow-400"
-               id="image-url-field"
-        />
+    <!-- Payload Form -->
+    <div class="mt-4 text-left text-sm font-semibold text-gray-700">Message</div>
+    <form method="post" action="{{ form_action }}">
+      <textarea name="message_text"
+                id="message_text"
+                minlength="15" 
+                maxlength="400"
+                required
+                placeholder="Type your message here..."
+                class="w-full h-44 mt-1 p-2 rounded bg-[#f4f1ea] font-mono auto-resize focus:outline-none focus:ring-2 focus:ring-yellow-400"
+      ></textarea>
 
-        <!-- Submit -->
-        <button type="button" 
-                onclick="confirmSubmit(this.form)"
-                class="mt-6 w-full bg-[#f7c948] hover:bg-yellow-400 text-black font-bold py-2 px-4 rounded transition"
-        >
-          Send
-        </button>
-      </form>
+      <p class="text-xs text-gray-600 mt-1" id="char-count">0 / 400</p>
+
+      <div class="mt-4 text-left text-sm font-semibold text-gray-700">Image URL</div>
+      <input type="url"
+             name="image_url"
+             placeholder="https://example.com/image.jpg"
+             required
+             class="w-full max-w-xl mt-1 p-2 rounded bg-[#f4f1ea] font-mono focus:outline-none focus:ring-2 focus:ring-yellow-400"
+             id="image-url-field"
+      />
+
+      <button type="button" 
+              onclick="confirmSubmit(this.form)"
+              class="mt-6 w-full bg-[#f7c948] hover:bg-yellow-400 text-black font-bold py-2 px-4 rounded transition"
+      >
+        Send
+      </button>
+    </form>
     {% endif %}
 
     <!-- Count the characters while typing -->
     <script>
-      const textarea = document.querySelector('textarea[name="message_text"]');
+      // Character counter
+      const textarea = document.getElementById("message_text");
       const counter = document.getElementById("char-count");
-    
       textarea.addEventListener("input", () => {
         counter.textContent = `${textarea.value.length} / 400`;
       });
-    </script>
 
-    <!-- Confirmation message before submitting form -->
-    <script>
+      // Confirm before submitting
       function confirmSubmit(form) {
         const userConfirmed = confirm("Are you sure you want to send this message?");
         if (userConfirmed) {
-          form.submit(); // Manually trigger the form submission
+          form.submit();
         } else {
           alert("No problem! You can keep editing your message 🙂");
         }
       }
-    </script>
 
-    <!-- Upload image connection with API -->
-    <script>
+      // Image uploader logic
       const statusMessage = document.getElementById('upload-status');
 
       function handleUpload(fileInputId, labelId, endpoint) {
@@ -171,12 +184,72 @@
 
       handleUpload('file-input-no-logo', 'file-label-no-logo', '/api/v1/images/upload');
       handleUpload('file-input-with-logo', 'file-label-with-logo', '/api/v1/images/upload-with-logo');
-      
-      // Auto-fill another form field with the image URL
-      document.getElementById('image-url-field').value = data.image_url;
+
+      async function fetchMessage() {
+          const urlInput = document.getElementById('url_input');
+          const messageTextarea = document.getElementById('message_text');
+          const imageUrlField = document.getElementById('image-url-field');
+          const autofillBtn = document.getElementById('autofill-btn');
+          const btnText = document.getElementById('btn-text');
+          const loadingSpinner = document.getElementById('loading-spinner');
+
+          try {
+            const url = urlInput.value.trim();
+            if (!url) {
+              alert("Please enter a link before autofilling.");
+              return;
+            }
+
+            // Set loading state
+            urlInput.disabled = true;
+            urlInput.classList.add('opacity-50', 'cursor-not-allowed', 'bg-gray-200');
+            messageTextarea.disabled = true;
+            messageTextarea.classList.add('opacity-50', 'cursor-not-allowed', 'bg-gray-200');
+            imageUrlField.disabled = true;
+            imageUrlField.classList.add('opacity-50', 'cursor-not-allowed', 'bg-gray-200');
+            
+            autofillBtn.disabled = true;
+            autofillBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            btnText.textContent = 'Loading...';
+            loadingSpinner.classList.remove('hidden');
+
+            const response = await fetch('/api/v1/messages/link', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ url })
+            });
+
+            if (!response.ok) throw new Error('Request failed');
+            const data = await response.json();
+
+            messageTextarea.value = data.message || '';
+            imageUrlField.value = data.image || '';
+            
+            // Update character counter
+            counter.textContent = `${messageTextarea.value.length} / 400`;
+
+          } catch (error) {
+            alert('Failed to fetch message');
+            console.error(error);
+          } finally {
+            // Reset loading state
+            urlInput.disabled = false;
+            urlInput.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-200');
+            messageTextarea.disabled = false;
+            messageTextarea.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-200');
+            imageUrlField.disabled = false;
+            imageUrlField.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-200');
+            
+            autofillBtn.disabled = false;
+            autofillBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            btnText.textContent = 'Autofill Message';
+            loadingSpinner.classList.add('hidden');
+          }
+      }
     </script>
 
   </div>
-
 </body>
 </html>

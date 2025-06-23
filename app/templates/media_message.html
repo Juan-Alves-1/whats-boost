@@ -25,19 +25,46 @@
       </a>  
     <!-- Display form only if message not yet sent -->
     {% else %}
+
+    <div class="mb-6">
+      <div class="text-left text-sm font-semibold text-gray-700 mb-1">Link</div>
+      <input type="text"
+             id="url_input"
+             placeholder="Paste the product link here"
+             class="w-full mt-1 mb-3 p-2 rounded bg-[#f4f1ea] font-mono focus:outline-none focus:ring-2 focus:ring-yellow-400"
+      />
+
+      <button type="button"
+              onclick="fetchMessage()"
+              id="autofill-btn"
+              class="mb-4 w-full bg-[#e0e0e0] hover:bg-[#d6d6d6] text-black font-medium py-2 px-4 rounded transition flex items-center justify-center">
+         <span id="btn-text">Autofill Message & Image</span>
+         <svg id="loading-spinner" class="hidden animate-spin ml-2 h-4 w-4 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+         </svg>
+      </button>
+    </div>
+
+    <div class="flex items-center mb-6">
+      <div class="flex-grow border-t border-gray-300"></div>
+      <span class="mx-3 text-xs text-gray-500 bg-[#fffcf5] px-2">OR</span>
+      <div class="flex-grow border-t border-gray-300"></div>
+    </div>
     
-    <div class="mt-6">
-      <div class="text-left text-sm font-semibold text-gray-700 mb-1">
-        Select an image from your device
+    <!-- Upload Section -->
+    <div class="mb-6">
+      <div class="text-left text-sm font-semibold text-gray-700 mb-2">
+        Upload your own image
       </div>
     
-      <div class="flex justify-center gap-4">
+      <div class="flex justify-center gap-3">
         <!-- Without logo -->
         <form class="flex items-center space-x-2" enctype="multipart/form-data" id="upload-form-no-logo">
           <label for="file-input-no-logo"
                  id="file-label-no-logo"
-                 class="bg-[#fff3c4] hover:bg-yellow-300/50 text-black py-1 px-3 rounded transition text-sm cursor-pointer">
-            Upload without logo
+                 class="bg-[#fff3c4] hover:bg-yellow-300/50 text-black py-2 px-3 rounded transition text-sm cursor-pointer">
+            Without logo
           </label>
           <input type="file"
                  name="file"
@@ -51,8 +78,8 @@
         <form class="flex items-center space-x-2" enctype="multipart/form-data" id="upload-form-with-logo">
           <label for="file-input-with-logo"
                  id="file-label-with-logo"
-                 class="bg-[#fff3c4] hover:bg-yellow-300/50 text-black py-1 px-3 rounded transition text-sm cursor-pointer">
-            Upload with logo
+                 class="bg-[#fff3c4] hover:bg-yellow-300/50 text-black py-2 px-3 rounded transition text-sm cursor-pointer">
+            With logo
           </label>
           <input type="file"
                  name="file"
@@ -66,24 +93,16 @@
       <p id="upload-status" class="mt-2 text-sm text-gray-600"></p>
     </div>
 
-    <!-- Autofill Section -->
-    <div class="mt-6 text-left text-sm font-semibold text-gray-700">Link</div>
-    <input type="text"
-           id="url_input"
-           placeholder="Paste the product link here"
-           class="w-full mt-1 mb-4 p-2 rounded bg-[#f4f1ea] font-mono focus:outline-none focus:ring-2 focus:ring-yellow-400"
-    />
-
-    <button type="button"
-            onclick="fetchMessage()"
-            id="autofill-btn"
-            class="mb-4 w-full bg-[#e0e0e0] hover:bg-[#d6d6d6] text-black font-medium py-2 px-4 rounded transition flex items-center justify-center">
-       <span id="btn-text">Autofill Message</span>
-       <svg id="loading-spinner" class="hidden animate-spin ml-2 h-4 w-4 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-       </svg>
-    </button>
+    <div id="image-preview-section" class="hidden mb-6">
+      <div class="text-left text-sm font-semibold text-gray-700 mb-2">Current Image</div>
+      <div class="bg-[#f4f1ea] rounded p-3">
+        <img id="image-preview" src="" alt="Preview" class="max-w-full h-32 object-contain mx-auto rounded">
+        <p id="image-source" class="text-xs text-gray-600 mt-2 text-center"></p>
+        <button type="button" onclick="clearImage()" class="mt-2 text-xs text-red-600 hover:text-red-800 transition">
+          Clear image
+        </button>
+      </div>
+    </div>
 
     <!-- Payload Form -->
     <div class="mt-4 text-left text-sm font-semibold text-gray-700">Message</div>
@@ -99,32 +118,104 @@
 
       <p class="text-xs text-gray-600 mt-1" id="char-count">0 / 400</p>
 
-      <div class="mt-4 text-left text-sm font-semibold text-gray-700">Image URL</div>
-      <input type="url"
+      <input type="hidden"
              name="image_url"
-             placeholder="https://example.com/image.jpg"
-             required
-             class="w-full max-w-xl mt-1 p-2 rounded bg-[#f4f1ea] font-mono focus:outline-none focus:ring-2 focus:ring-yellow-400"
              id="image-url-field"
       />
 
       <button type="button" 
               onclick="confirmSubmit(this.form)"
-              class="mt-6 w-full bg-[#f7c948] hover:bg-yellow-400 text-black font-bold py-2 px-4 rounded transition"
+              id="send-btn"
+              class="mt-6 w-full bg-gray-300 text-gray-500 font-bold py-2 px-4 rounded cursor-not-allowed transition"
+              disabled
       >
-        Send
+        Add an image to continue
       </button>
     </form>
     {% endif %}
 
-    <!-- Count the characters while typing -->
     <script>
+      let currentImageSource = null; // Track source: 'autofill', 'upload-no-logo', 'upload-with-logo'
+
       // Character counter
       const textarea = document.getElementById("message_text");
       const counter = document.getElementById("char-count");
+      const sendBtn = document.getElementById("send-btn");
+      
       textarea.addEventListener("input", () => {
         counter.textContent = `${textarea.value.length} / 400`;
+        updateSendButton();
       });
+
+      function updateSendButton() {
+        const hasMessage = textarea.value.trim().length >= 15;
+        const hasImage = document.getElementById('image-url-field').value.trim() !== '';
+        
+        if (hasMessage && hasImage) {
+          sendBtn.disabled = false;
+          sendBtn.classList.remove('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+          sendBtn.classList.add('bg-[#f7c948]', 'hover:bg-yellow-400', 'text-black');
+          sendBtn.textContent = 'Send';
+        } else {
+          sendBtn.disabled = true;
+          sendBtn.classList.add('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+          sendBtn.classList.remove('bg-[#f7c948]', 'hover:bg-yellow-400', 'text-black');
+          
+          if (!hasImage) {
+            sendBtn.textContent = 'Add an image to continue';
+          } else if (!hasMessage) {
+            sendBtn.textContent = 'Message too short (min 15 chars)';
+          }
+        }
+      }
+
+      function showImagePreview(imageUrl, source) {
+        const previewSection = document.getElementById('image-preview-section');
+        const previewImg = document.getElementById('image-preview');
+        const imageSourceText = document.getElementById('image-source');
+        
+        previewImg.src = imageUrl;
+        previewSection.classList.remove('hidden');
+        
+        const sourceLabels = {
+          'autofill': 'From link autofill',
+          'autofill-with-logo': 'From link autofill (with logo)',
+          'upload-no-logo': 'Uploaded without logo',
+          'upload-with-logo': 'Uploaded with logo'
+        };
+        
+        imageSourceText.textContent = sourceLabels[source] || 'Unknown source';
+        currentImageSource = source;
+        
+        document.getElementById('image-url-field').value = imageUrl;
+        updateSendButton();
+      }
+
+      function clearImage() {
+        document.getElementById('image-preview-section').classList.add('hidden');
+        document.getElementById('image-url-field').value = '';
+        currentImageSource = null;
+        
+        resetUploadButtons();
+        updateSendButton();
+      }
+
+      function resetUploadButtons() {
+        const labels = ['file-label-no-logo', 'file-label-with-logo'];
+        const inputs = ['file-input-no-logo', 'file-input-with-logo'];
+        
+        labels.forEach((labelId, index) => {
+          const label = document.getElementById(labelId);
+          const input = document.getElementById(inputs[index]);
+          
+          label.textContent = labelId.includes('with') ? 'With logo' : 'Without logo';
+          label.classList.remove('opacity-50', 'cursor-not-allowed');
+          label.style.pointerEvents = 'auto';
+          input.value = '';
+        });
+        
+        document.getElementById('upload-status').textContent = '';
+      }
 
       // Confirm before submitting
       function confirmSubmit(form) {
@@ -136,24 +227,26 @@
         }
       }
 
-      // Image uploader logic
-      const statusMessage = document.getElementById('upload-status');
-
       function handleUpload(fileInputId, labelId, endpoint) {
         const fileInput = document.getElementById(fileInputId);
         const label = document.getElementById(labelId);
+        const statusMessage = document.getElementById('upload-status');
 
         fileInput.addEventListener('change', async () => {
           const file = fileInput.files[0];
           if (!file) {
-            label.textContent = labelId.includes("with") ? "Upload with logo" : "Upload without logo";
+            label.textContent = labelId.includes("with") ? "With logo" : "Without logo";
             return;
+          }
+
+          if (currentImageSource) {
+            clearImage();
           }
 
           label.textContent = 'Uploading...';
           label.classList.add('opacity-50', 'cursor-not-allowed');
           label.style.pointerEvents = 'none';
-          statusMessage.textContent = '';
+          statusMessage.textContent = 'Uploading image...';
 
           const formData = new FormData();
           formData.append('file', file);
@@ -168,14 +261,15 @@
 
             const data = await response.json();
             label.textContent = '✅ Uploaded';
-            statusMessage.textContent = 'Image URL added below.';
-            document.getElementById('image-url-field').value = data.image_url;
-            label.classList.add('opacity-50', 'cursor-not-allowed');
-            label.style.pointerEvents = 'none';
+            statusMessage.textContent = 'Image uploaded successfully!';
+            
+            // Show preview with appropriate source
+            const source = labelId.includes('with') ? 'upload-with-logo' : 'upload-no-logo';
+            showImagePreview(data.image_url, source);
 
           } catch (error) {
-            label.textContent = '❌ Upload failed';
-            statusMessage.textContent = 'Please try again.';
+            label.textContent = '❌ Failed';
+            statusMessage.textContent = 'Upload failed. Please try again.';
             label.classList.remove('opacity-50', 'cursor-not-allowed');
             label.style.pointerEvents = 'auto';
           } 
@@ -188,7 +282,6 @@
       async function fetchMessage() {
           const urlInput = document.getElementById('url_input');
           const messageTextarea = document.getElementById('message_text');
-          const imageUrlField = document.getElementById('image-url-field');
           const autofillBtn = document.getElementById('autofill-btn');
           const btnText = document.getElementById('btn-text');
           const loadingSpinner = document.getElementById('loading-spinner');
@@ -200,17 +293,20 @@
               return;
             }
 
+            // Clear any existing image first if from upload
+            if (currentImageSource && currentImageSource.startsWith('upload')) {
+              clearImage();
+            }
+
             // Set loading state
             urlInput.disabled = true;
             urlInput.classList.add('opacity-50', 'cursor-not-allowed', 'bg-gray-200');
             messageTextarea.disabled = true;
             messageTextarea.classList.add('opacity-50', 'cursor-not-allowed', 'bg-gray-200');
-            imageUrlField.disabled = true;
-            imageUrlField.classList.add('opacity-50', 'cursor-not-allowed', 'bg-gray-200');
             
             autofillBtn.disabled = true;
             autofillBtn.classList.add('opacity-50', 'cursor-not-allowed');
-            btnText.textContent = 'Loading...';
+            btnText.textContent = 'Fetching data...';
             loadingSpinner.classList.remove('hidden');
 
             const response = await fetch('/api/v1/messages/link', {
@@ -221,33 +317,66 @@
               body: JSON.stringify({ url })
             });
 
-            if (!response.ok) throw new Error('Request failed');
+            if (!response.ok) throw new Error('Failed to fetch link data');
             const data = await response.json();
 
             messageTextarea.value = data.message || '';
-            imageUrlField.value = data.image || '';
-            
-            // Update character counter
             counter.textContent = `${messageTextarea.value.length} / 400`;
 
+            if (data.image) {
+              btnText.textContent = 'Adding logo to image...';
+              
+              const imageResponse = await fetch(data.image);
+              if (!imageResponse.ok) throw new Error('Failed to fetch image');
+              
+              const imageBlob = await imageResponse.blob();
+              
+              const formData = new FormData();
+              formData.append('file', imageBlob, 'autofilled-image.jpg');
+
+              const uploadResponse = await fetch('/api/v1/images/upload-with-logo', {
+                method: 'POST',
+                body: formData
+              });
+
+              if (!uploadResponse.ok) throw new Error('Failed to upload image with logo');
+              
+              const uploadData = await uploadResponse.json();
+              
+              showImagePreview(uploadData.image_url, 'autofill-with-logo');
+            } else {
+              alert('No image found in the provided link. Please upload an image manually.');
+            }
+            
+            updateSendButton();
+
           } catch (error) {
-            alert('Failed to fetch message');
-            console.error(error);
+            console.error('Autofill error:', error);
+            if (error.message.includes('fetch link data')) {
+              alert('Failed to fetch data from the link. Please check the URL and try again.');
+            } else if (error.message.includes('fetch image')) {
+              alert('Found link data but failed to process the image. Please upload an image manually.');
+            } else if (error.message.includes('upload image')) {
+              alert('Failed to add logo to the image. Please try uploading manually.');
+            } else {
+              alert('Failed to process the link. Please try again or upload manually.');
+            }
           } finally {
-            // Reset loading state
             urlInput.disabled = false;
             urlInput.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-200');
             messageTextarea.disabled = false;
             messageTextarea.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-200');
-            imageUrlField.disabled = false;
-            imageUrlField.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-200');
             
             autofillBtn.disabled = false;
             autofillBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-            btnText.textContent = 'Autofill Message';
+            btnText.textContent = 'Autofill Message & Image';
             loadingSpinner.classList.add('hidden');
           }
       }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        updateSendButton();
+      });
     </script>
 
   </div>

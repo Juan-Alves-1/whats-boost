@@ -1,8 +1,11 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Depends
 from fastapi.responses import HTMLResponse
 from starlette.responses import RedirectResponse
 from authlib.integrations.starlette_client import OAuth
 from app.config.settings import settings
+from sqlalchemy.orm import Session
+from app.dependencies.db import get_db
+from app.db.crud import get_user_by_email
 
 router = APIRouter()
 
@@ -22,15 +25,17 @@ async def login(request: Request):
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
 @router.get("/auth")
-async def auth(request: Request):
+async def auth(request: Request, db: Session = Depends(get_db)):
     token = await oauth.google.authorize_access_token(request)
     user = token.get('userinfo')
 
-    if user and user["email"] in settings.ALLOWED_EMAILS:
-        request.session['user'] = dict(user)
-        return RedirectResponse(url="/choose") # Make it dynamically later 
-    else:
-        return RedirectResponse(url="/unauthorized")
+    if user:
+        db_user = get_user_by_email(db, user["email"])
+        if db_user:
+            request.session['user'] = dict(user)
+            return RedirectResponse(url="/choose") # Make it dynamically later 
+
+    return RedirectResponse(url="/unauthorized")
 
 @router.get("/unauthorized")
 async def unauthorized():

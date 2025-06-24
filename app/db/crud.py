@@ -100,11 +100,44 @@ def soft_delete_record(db: Session, model_cls: Type[T], pk: int) -> T:
         raise
 
 
-# Specific database operations for users
-def get_user_by_email(db: Session, email: str) -> User | None:
-    return db.query(User).filter(User.email == email).first()
+''' Specific database operations for users ''' 
+def get_user_by_email(db: Session, user_email: str) -> User | None:
+    return db.query(User).filter(User.email == user_email).first()
 
-# Specific database operations for groups
-def get_group_by_whatsapp_id(db: Session, whatsapp_id: str) -> Group | None:
-    return db.query(Group).filter(Group.whatsapp_group_id == whatsapp_id).first()
+''' Specific database operations for groups '''
+def get_group_by_whatsapp_id(db: Session, whatsapp_group_id: str) -> Group | None:
+    return db.query(Group).filter(Group.whatsapp_group_id == whatsapp_group_id).first()
+
+''' Specific database operations for join table '''
+def get_all_groups_by_user(db: Session, user_email: str) -> list[str]:
+    user = db.query(User).filter(User.email == user_email).first()
+    if not user:
+        return []
+    
+    whatsapp_group_ids = []
+    for group in user.groups:
+        whatsapp_group_ids.append(group.whatsapp_group_id)
+    
+    return whatsapp_group_ids
+
+def link_group_to_user(db: Session, *, user_email: str, whatsapp_group_id: str) -> bool:
+    try:
+        user = db.query(User).filter(User.email == user_email).first()
+        if not user:
+            raise ValueError(f"User with email '{user_email}' not found.")
+
+        group = db.query(Group).filter(Group.whatsapp_group_id == whatsapp_group_id).first()
+        if not group:
+            raise ValueError(f"Group with ID '{whatsapp_group_id}' not found.")
+
+        if group in user.groups:
+            return False  # Already linked
+
+        user.groups.append(group)
+        db.commit()
+        return True
+
+    except SQLAlchemyError as e:
+        db.rollback()
+        raise RuntimeError(f"Database error while linking group to user: {str(e)}")
 

@@ -22,7 +22,6 @@ def create_group(payload: GroupCreate, db: Session = Depends(get_db)):
     
     return group
 
-
 @router.get("/{group_id}", response_model=GroupRead, status_code=status.HTTP_200_OK)
 def get_group(group_id: int, db: Session = Depends(get_db)):
     try:
@@ -70,3 +69,17 @@ def delete_group(group_id: int, db: Session = Depends(get_db)):
             detail="Unexpected error during soft delete for a whatsapp group",
         )
     return deleted_user
+
+@router.post("/link-group")
+def link_group(user_email: str, whatsapp_group_id: str, db: Session = Depends(get_db)):
+    try:
+        success = crud.link_group_to_user(db, user_email=user_email, whatsapp_group_id=whatsapp_group_id)
+        if not success:
+            return {"message": "Group already linked to user"}
+        return {"message": "Group linked successfully"}
+
+    except ValueError as ve:
+        raise HTTPException(status_code=404, detail=str(ve))
+
+    except RuntimeError as re:
+        raise HTTPException(status_code=500, detail=str(re))

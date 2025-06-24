@@ -15,4 +15,5 @@ bleach
 cloudinary
 redis
 celery[redis]
-
+python-amazon-paapi
+openai

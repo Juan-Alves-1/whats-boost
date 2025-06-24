@@ -1,8 +1,9 @@
 services:
 
   app:
-    container_name: app
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.app
     volumes:
       - .:/app
     ports:
@@ -17,10 +18,10 @@ services:
     ports:
       - "6379:6379" 
 
-  celery_worker:
-    container_name: celery_worker
-    build: .
-    command: celery -A celery_worker.celery worker --loglevel=info --pool=prefork -Q scheduler,media -E
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
     volumes:
       - .:/app
     env_file:

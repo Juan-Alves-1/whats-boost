@@ -1,56 +1,98 @@
 services:
   - type: web
-    name: fastapi-app
-    env: docker
+    runtime: docker
+    dockerContext: .
+    dockerfilePath: Dockerfile.app
+    name: app
     plan: free
     autoDeploy: true
-    buildCommand: docker build -t fastapi-app .
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port 8000
     envVars:
       - key: REDIS_URL
         fromService:
-          type: redis
-          name: redis
+          type: keyvalue
+          name: keyvalue
+          property: host
       - key: CELERY_BROKER_URL
         fromService:
-          type: redis
-          name: redis
+          type: keyvalue
+          name: keyvalue
+          property: host
       - key: CELERY_RESULT_BACKEND
         fromService:
-          type: redis
-          name: redis
-      - key: SECRET_KEY
+          type: keyvalue
+          name: keyvalue
+          property: host
+      - key: ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: PORT
+        value: 8000
+      - key: API_KEY
+        sync: false
+      - key: INSTANCE_ID
+        sync: false
+      - key: EVO_C_URL
         sync: false
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: GOOGLE_CLIENT_SECRET
         sync: false
-      - key: EVO_C_URL
+      - key: SECRET_KEY
         sync: false
-      - key: INSTANCE_ID
+
+      # Allowed Emails
+      - key: ALLOWED_EMAILS
         sync: false
-      - key: API_KEY
+
+      # Cloudinary Configuration
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+
+      # Amazon Configuration
+      - key: AMAZON_ACCESS_KEY
+        sync: false
+      - key: AMAZON_SECRET_KEY
+        sync: false
+      - key: AMAZON_PARTNER_TAG
+        sync: false
+      - key: AMAZON_COUNTRY
+        sync: false
+
+      # OpenAI Configuration
+      - key: OPENAI_HOST
+        sync: false
+      - key: OPENAI_KEY
+        sync: false
+      - key: OPENAI_MODEL
         sync: false
 
   - type: worker
-    name: celery_worker
-    env: docker
-    plan: starter
-    buildCommand: docker build -t celery_worker .
-    startCommand: celery -A celery_worker.celery worker --loglevel=info --pool=prefork -Q scheduler,media -E
+    runtime: docker
+    dockerContext: .
+    dockerfilePath: Dockerfile.worker
+    name: worker
+    plan: free
     envVars:
       - key: REDIS_URL
         fromService:
-          type: redis
-          name: redis
+          type: keyvalue
+          name: keyvalue
+          property: host
       - key: CELERY_BROKER_URL
         fromService:
-          type: redis
-          name: redis
+          type: keyvalue
+          name: keyvalue
+          property: host
       - key: CELERY_RESULT_BACKEND
         fromService:
-          type: redis
-          name: redis
+          type: keyvalue
+          name: keyvalue
+          property: host
       - key: SECRET_KEY
         sync: false
       - key: GOOGLE_CLIENT_ID
@@ -64,6 +106,9 @@ services:
       - key: API_KEY
         sync: false
 
-databases:
-  - name: redis
-    type: redis
+  - type: keyvalue
+    name: keyvalue
+    plan: free
+    ipAllowList: # Allow external connections from everywhere
+      - source: 0.0.0.0/0
+        description: everywhere

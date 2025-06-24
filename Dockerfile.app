@@ -18,10 +18,4 @@ RUN chown -R appuser:appgroup /app
 # Switch to the non-root user
 USER appuser
 
-FROM base AS development
-
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
-
-FROM base AS production
-
-CMD ["bash"] 
+CMD ["python", "-m", "app.main"]

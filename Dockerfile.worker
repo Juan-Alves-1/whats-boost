@@ -18,10 +18,4 @@ RUN chown -R appuser:appgroup /app
 # Switch to the non-root user
 USER appuser
 
-FROM base AS development
-
-CMD ["celery", "-A", "celery_worker.celery", "worker", "--loglevel=info", "--pool=prefork", "-Q", "scheduler,media", "-E", "--concurrency=2", "--max-tasks-per-child=500", "--prefetch-multiplier=2"]
-
-FROM base AS production
-
-CMD ["celery", "-A", "celery_worker.celery", "worker", "--loglevel=info", "--pool=prefork", "-Q", "scheduler,media", "-E", "--concurrency=2", "--max-tasks-per-child=500", "--prefetch-multiplier=2"]
+CMD ["celery", "-A", "app.worker", "worker", "--loglevel=info", "--pool=prefork", "-Q", "scheduler,media", "-E", "--concurrency=2", "--max-tasks-per-child=500", "--prefetch-multiplier=2"]

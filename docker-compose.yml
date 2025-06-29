@@ -1,27 +1,70 @@
 services:
 
+  postgres:
+    image: postgres:15
+    restart: unless-stopped
+    command: ["postgres", "-c", "max_connections=1000", "-c", "listen_addresses=*"]
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_DB=evolution
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d evolution"]
+      start_period: 15s
+      interval: 30s
+      timeout: 60s
+      retries: 5
+
+  redis:
+    image: redis:7.2
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      start_period: 15s
+      interval: 30s
+      timeout: 60s
+      retries: 5
+
+  evolution:
+    image: evoapicloud/evolution-api:latest
+    restart: unless-stopped
+    environment:
+      - SERVER_TYPE=${EVO_SERVER_TYPE}
+      - SERVER_PORT=${EVO_SERVER_PORT}
+      - DATABASE_PROVIDER=${EVO_DATABASE_PROVIDER}
+      - DATABASE_CONNECTION_URI=${EVO_DATABASE_CONNECTION_URI}
+      - CACHE_REDIS_ENABLED=${EVO_CACHE_REDIS_ENABLED}
+      - CACHE_REDIS_URI=${EVO_CACHE_REDIS_URI}
+      - CACHE_REDIS_TTL=${EVO_CACHE_REDIS_TTL}
+      - AUTHENTICATION_API_KEY=${EVO_API_KEY}
+      - SERVER_URL=${EVO_SERVER_URL}
+    ports:
+      - 8080:8080
+    depends_on:
+      - redis
+      - postgres
+
   app:
     build:
       context: .
       dockerfile: Dockerfile.app
+    restart: unless-stopped
     volumes:
       - .:/app
     ports:
       - 8000:8000
-    restart: always
     env_file:
       - .env
-
-  redis:
-    container_name: redis
-    image: redis:7.2
-    ports:
-      - "6379:6379" 
+    depends_on:
+      - evolution
+      - redis
 
   worker:
     build:
       context: .
       dockerfile: Dockerfile.worker
+    restart: unless-stopped
     volumes:
       - .:/app
     env_file:
@@ -29,7 +72,6 @@ services:
     depends_on:
       - app
       - redis
-
 
   # flower:
   #  container_name: flower

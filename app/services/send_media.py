@@ -6,7 +6,7 @@ from app.utils.logger import logger
 
 # Send media message {photo + message} to a single group via a HTTP request to EVO API 
 def send_media_message(group_id: str, caption: str, media_url: str, evo_delay_ms: int, mediatype: str, mimetype: str):
-    url = f"{settings.EVO_C_URL}/message/sendMedia/{settings.INSTANCE_ID}"
+    url = f"{settings.EVO_SERVER_URL}/message/sendMedia/{settings.EVO_INSTANCE_ID}"
     payload = {
         "number": group_id,
         "mediatype": mediatype,
@@ -18,7 +18,7 @@ def send_media_message(group_id: str, caption: str, media_url: str, evo_delay_ms
         "mentionsEveryOne": False
     }
     headers = {
-        "apikey": settings.API_KEY,
+        "apikey": settings.EVO_API_KEY,
         "Content-Type": "application/json",
         "User-Agent": "WhatsBoost/1.0"
     }

@@ -14,9 +14,10 @@ class Settings(BaseSettings):
     HOST: str
     PORT: int
 
-    API_KEY: str
-    INSTANCE_ID: str
-    EVO_C_URL: str
+    EVO_SERVER_URL: str
+    EVO_API_KEY: str
+    EVO_INSTANCE_ID: str
+
     GOOGLE_CLIENT_ID: str
     GOOGLE_CLIENT_SECRET: str
     SECRET_KEY: str
@@ -43,6 +44,7 @@ class Settings(BaseSettings):
     
     class Config:
         env_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '.env'))
+        extra = "allow"
 
 
 settings = Settings()

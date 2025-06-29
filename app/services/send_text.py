@@ -16,7 +16,7 @@ def format_timestamp(ts: str) -> str:
 async def send_text_message(group_id: str, message_text: str, evo_delay_ms: int, server_delay_sec: int):
     await asyncio.sleep(server_delay_sec)  # This delay is what staggered the execution
     
-    url = f"{settings.EVO_C_URL}/message/sendText/{settings.INSTANCE_ID}"
+    url = f"{settings.EVO_SERVER_URL}/message/sendText/{settings.EVO_INSTANCE_ID}"
     payload = {
         "number": group_id,
         "text": message_text,
@@ -25,7 +25,7 @@ async def send_text_message(group_id: str, message_text: str, evo_delay_ms: int,
         "mentionsEveryOne": False
     }
     headers = {
-        "apikey": settings.API_KEY,
+        "apikey": settings.EVO_API_KEY,
         "Content-Type": "application/json"
     }
 

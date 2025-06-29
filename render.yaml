@@ -28,11 +28,11 @@ services:
         value: 0.0.0.0
       - key: PORT
         value: 8000
-      - key: API_KEY
+      - key: EVO_SERVER_URL
         sync: false
-      - key: INSTANCE_ID
+      - key: EVO_API_KEY
         sync: false
-      - key: EVO_C_URL
+      - key: EVO_INSTANCE_ID
         sync: false
       - key: GOOGLE_CLIENT_ID
         sync: false
@@ -99,11 +99,11 @@ services:
         sync: false
       - key: GOOGLE_CLIENT_SECRET
         sync: false
-      - key: EVO_C_URL
+      - key: EVO_SERVER_URL
         sync: false
-      - key: INSTANCE_ID
+      - key: EVO_API_KEY
         sync: false
-      - key: API_KEY
+      - key: EVO_INSTANCE_ID
         sync: false
 
   - type: keyvalue

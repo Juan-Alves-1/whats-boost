@@ -20,9 +20,26 @@
       </div>
     {% else %}
       <!-- Display form only if message not yet sent -->
+      <div class="font-semibold text-lg mb-2">Link</div>
+      <input type="text"
+             id="url_input"
+             placeholder="Paste the product link here"
+             class="w-full mb-4 p-2 rounded bg-[#f4f1ea] font-mono focus:outline-none focus:ring-2 focus:ring-yellow-400"
+      />
+      <button type="button"
+              onclick="fetchMessage()"
+              id="autofill-btn"
+              class="mb-4 w-full bg-[#e0e0e0] hover:bg-[#d6d6d6] text-black font-medium py-2 px-4 rounded transition flex items-center justify-center">
+         <span id="btn-text">Autofill Message</span>
+         <svg id="loading-spinner" class="hidden animate-spin ml-2 h-4 w-4 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+         </svg>
+      </button>
       <div class="font-semibold text-lg mb-2">Message</div>
       <form method="post" action="{{ form_action }}">
         <textarea name="message_text"
+                  id="message_text"
                   required
                   placeholder="Type your message here..."
                   class="w-full h-24 p-2 rounded bg-[#f4f1ea] font-mono resize-none focus:outline-none focus:ring-2 focus:ring-yellow-400"
@@ -35,6 +52,60 @@
       </form>
     {% endif %}
   </div>
+  <script>
+    async function fetchMessage() {
+      const urlInput = document.getElementById('url_input');
+      const messageTextarea = document.getElementById('message_text');
+      const autofillBtn = document.getElementById('autofill-btn');
+      const btnText = document.getElementById('btn-text');
+      const loadingSpinner = document.getElementById('loading-spinner');
 
+      try {
+        const url = urlInput.value.trim();
+        if (!url) {
+          alert("Please enter a link before autofilling.");
+          return;
+        }
+
+        // Set loading state
+        urlInput.disabled = true;
+        urlInput.classList.add('opacity-50', 'cursor-not-allowed', 'bg-gray-200');
+        messageTextarea.disabled = true;
+        messageTextarea.classList.add('opacity-50', 'cursor-not-allowed', 'bg-gray-200');
+        
+        autofillBtn.disabled = true;
+        autofillBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        btnText.textContent = 'Loading...';
+        loadingSpinner.classList.remove('hidden');
+
+        const response = await fetch('/api/v1/messages/link', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ url })
+        });
+
+        if (!response.ok) throw new Error('Request failed');
+        const data = await response.json();
+        messageTextarea.value = data.message || '';
+
+      } catch (error) {
+        alert('Failed to fetch message');
+        console.error(error);
+      } finally {
+        // Reset loading state
+        urlInput.disabled = false;
+        urlInput.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-200');
+        messageTextarea.disabled = false;
+        messageTextarea.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-200');
+        
+        autofillBtn.disabled = false;
+        autofillBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        btnText.textContent = 'Autofill Message';
+        loadingSpinner.classList.add('hidden');
+      }
+    }
+  </script>
 </body>
 </html>

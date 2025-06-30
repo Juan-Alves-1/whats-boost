@@ -1,10 +1,19 @@
 import os
+from enum import Enum
 from typing import List
 from pydantic import Field 
 from pydantic_settings import BaseSettings
 
+class Env(Enum):
+    PRODUCTION = "production"
+    DEVELOPMENT = "development"
 
 class Settings(BaseSettings):
+    ENV: Env
+
+    HOST: str
+    PORT: int
+
     API_KEY: str
     INSTANCE_ID: str
     EVO_C_URL: str
@@ -18,6 +27,15 @@ class Settings(BaseSettings):
     REDIS_URL: str = Field(default="redis://localhost:6379/0")
     CELERY_BROKER_URL: str = Field(default="redis://localhost:6379/0")
     CELERY_RESULT_BACKEND: str = Field(default="redis://localhost:6379/0")
+
+    AMAZON_ACCESS_KEY: str
+    AMAZON_SECRET_KEY: str
+    AMAZON_PARTNER_TAG: str
+    AMAZON_COUNTRY: str
+
+    OPENAI_HOST: str
+    OPENAI_KEY: str
+    OPENAI_MODEL: str
 
     @property # Hot fix: cast env variable to a list
     def ALLOWED_EMAILS(self) -> list[str]:

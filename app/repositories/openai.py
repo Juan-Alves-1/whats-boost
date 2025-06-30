@@ -39,7 +39,7 @@ class OpenAIRepository:
         """Create a detailed prompt for generating promotional messages."""
 
         style_instructions = {
-            "enthusiastic": "Use exciting language, emojis, and create urgency. Be energetic and persuasive.",
+            "enthusiastic": "Sound like a friend sharing an exciting deal—fun. Often be urgent and relatable.",
             "professional": "Use professional tone, focus on product benefits and value proposition.",
             "casual": "Use friendly, conversational tone. Be approachable and relatable.",
         }
@@ -49,34 +49,24 @@ class OpenAIRepository:
         )
 
         prompt = f"""
-Create a promotional WhatsApp message for the following product:
+        Create a promotional WhatsApp copy according to the following product details:
 
-Product Title: {product.title}
-Price: {product.price}
-Saving: {product.saving}
-Product URL: {product.url}
+        - Product title: {product.title}
+        - Price: {product.price}
+        - Saving: {product.saving}
+        - Product URL: {product.url}
+        - Style: {style_instruction}
+        - Maximum size: {max_len} characters
 
-Requirements:
-- In portuguese
-- Only the message; nothing more
-- Maximum {max_len} characters
-- Style: {style_instruction}
-- Include relevant emojis for WhatsApp
-- Include product url completely
-- Include a call-to-action
-- Make it engaging and likely to drive clicks/purchases
-- Format for WhatsApp sharing
-- Don't short the links becuase of affiliate tag
-
-Focus on creating urgency and highlighting the product's appeal. Make it something people would want to share or click on immediately.
-"""
+        You must make it sound natural in Brazilian Portuguese.
+        """
         return prompt
 
     def generate_promotional_message(
         self,
         product: Product,
-        max_len: int = 300,
-        max_token: int = 200,
+        max_len: int = 270,
+        max_token: int = 95,
         style: str = "enthusiastic",
     ) -> str:
         """
@@ -96,23 +86,57 @@ Focus on creating urgency and highlighting the product's appeal. Make it somethi
             OpenAIRepositoryError: For other unexpected errors
         """
         try:
-            # Create the prompt for generating promotional message
-            prompt = self._create_promotional_prompt(product, max_len, style)
+            user_prompt = self._create_promotional_prompt(product, max_len, style)
+            system_prompt = """
+            You are a senior Brazilian copywriter and WhatsApp marketing expert who only writes e-commerce copy in Brazilian Portuguese.
+            Your Tone of Voice is punchy, concise, emoji-rich, sometimes a bit sassy or playful, but never spammy. 
+
+            Follow the template below and use **two** consecutive newline characters (`\n\n`) to separate each section of your message:
+                1. HEADLINE (optional) 
+                    - A one-to-five-word, attention-grabbing phrase
+                2. PRODUCT BLOCK (required) 
+                    - Review typos and then include the product name  
+                    - Old price (struck through) and new price (bold) 
+                3. BENEFIT (optional) 
+                    - One line describing a key selling point or urgency 
+                4. CTA & LINK (required)
+                    - A direct call-to-action & full affiliate URL
+            
+                Examples below according to template aforementioned:
+                    Example 1:
+                        "HMMMM COQUINHA GELADA 😋 \n\n" 
+                        "Pack de Coca-Cola sem açucar com 6 unidades (lata de 220ml) \n\n"
+                        "~De R$ 23~ por apenas *R$ 13 \n\n"
+                        "Link direto da promo: https://amzlink.to/example"
+
+                    Example 2:
+                        "Nivea Hidratante Soft Milk 200ml \n\n"
+                        "Compre em recorrência (cancele quando quiser) \n\n"
+                        "*Por R$ 12* 😱 \n\n"
+                        "Deixa sua pele macia e hidratada como um toque de seda! \n\n"
+                        "Link da promo: https://amzlink.to/example"
+
+            Constraints:  
+                - Only return the WhatsApp message text. No commentary or markdown
+                - Always use full affiliate URL (no URL shorteners)
+                - Only include relevant emojis for the product context
+                - Use 1 exclamation mark maximum for the whole copy
+                - Avoid English terms and gendered language
+            """
+                        
+            messages = [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ]
 
             response = self.client.chat.completions.create(
                 model=self.setting.OPENAI_MODEL,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are a marketing expert specializing in creating engaging WhatsApp promotional messages. Create compelling messages that drive sales while being concise and WhatsApp-friendly.",
-                    },
-                    {"role": "user", "content": prompt},
-                ],
-                max_tokens=max_token,
-                temperature=0.7,
-                top_p=1.0,
-                frequency_penalty=0.0,
-                presence_penalty=0.0,
+                messages=messages,
+                max_completion_tokens=max_token,
+                temperature=0.6,
+                top_p=0.9,
+                frequency_penalty=0.2,
+                presence_penalty=0.1,
             )
 
             if not response.choices or not response.choices[0].message:

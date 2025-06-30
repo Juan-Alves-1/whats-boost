@@ -13,7 +13,7 @@ def init_logging(level=logging.INFO):
     if not logger.handlers:
         # Send log messages to the console (stdout)
         handler = logging.StreamHandler(sys.stdout)
-        # Example: 2024-04-25 17:00:01 - INFO - app.services.media - Message sent
+        # Example: 2024-04-25 17:00:01 - INFO - services.media - Message sent
         formatter = logging.Formatter(
             '%(asctime)s - %(levelname)s - %(name)s - %(message)s'
         )

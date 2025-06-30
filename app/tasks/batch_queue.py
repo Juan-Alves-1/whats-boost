@@ -1,4 +1,4 @@
-from celery_worker import celery
+from app.worker import celery
 from celery.exceptions import Retry, MaxRetriesExceededError
 from app.utils.redis_client import get_user_lock_status, acquire_user_lock, release_user_lock, redis_client
 from app.utils.media_helpers import get_typing_range_ms

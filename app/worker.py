@@ -13,13 +13,4 @@ celery.conf.update(
     worker_hijack_root_logger=False,  # Prevent Celery from overriding logs
 )
 
-# Not working properly since celery couldn't find tasks by name
-# celery.autodiscover_tasks(packages=["tasks"]) 
-
-celery.conf.task_routes = {
-    "tasks.batch_queue.enqueue_user_media_batch": {"queue": "scheduler"},
-    "tasks.batch_queue.send_user_media_batch": {"queue": "media"},
-    "tasks.batch_queue.send_media_message_subtask": {"queue": "media"},
-    "tasks.batch_queue.release_and_check_queue": {"queue": "media"},
-}
-
+celery.autodiscover_tasks(packages=["app.tasks"]) 

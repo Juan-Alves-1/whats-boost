@@ -18,4 +18,4 @@ RUN chown -R appuser:appgroup /app
 # Switch to the non-root user
 USER appuser
 
-CMD ["celery", "-A", "app.worker", "worker", "--loglevel=info", "--pool=prefork", "-Q", "scheduler,media", "-E", "--concurrency=2", "--max-tasks-per-child=500", "--prefetch-multiplier=2"]
+CMD ["celery", "-A", "app.worker", "worker", "--loglevel=info", "--pool=prefork", "-E", "--concurrency=2", "--max-tasks-per-child=500", "--prefetch-multiplier=2"]

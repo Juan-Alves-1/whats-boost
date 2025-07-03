@@ -15,5 +15,6 @@ bleach
 cloudinary
 redis
 celery[redis]
+git+https://github.com/hirotoshi/paapi5-python-sdk.git#egg=paapi5_python_sdk
 python-amazon-paapi
 openai

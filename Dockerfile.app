@@ -1,5 +1,10 @@
 FROM python:3.11-slim AS base
 
+# 1) Install git (and clean up apt cache)
+RUN apt-get update \
+&& apt-get install -y --no-install-recommends git \
+&& rm -rf /var/lib/apt/lists/*
+
 # Create a non-root user and group
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 

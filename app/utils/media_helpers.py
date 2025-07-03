@@ -11,15 +11,15 @@ def get_typing_range_ms(caption: str) -> tuple[int, int]:
     average_typer = 6 
     fast_typer = 8 
     super_typer = 12
-    turbo_mode_min = 28
-    turbo_mode_max = 35
+    turbo_mode_baseline = 28
+    turbo_mode_topline = 35
     length = len(caption) 
     adjusted_length = length - 90 if length > 260 else length # Half-baked solution: imply join group links as a copy and paste action
 
     # Adjust to return int: e.g. replace / with //
     try: 
-        min_time = (adjusted_length / turbo_mode_min) * 1000
-        max_time = (adjusted_length / turbo_mode_max) * 1000
+        min_time = (adjusted_length / turbo_mode_topline) * 1000
+        max_time = (adjusted_length / turbo_mode_baseline) * 1000
         return round(min_time), round(max_time)
     except Exception:
         logger.error("Unable to get dynamic typing for delays (between subtasks) and WhatsApp presence (EVO delay)")

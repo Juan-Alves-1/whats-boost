@@ -15,5 +15,6 @@ bleach
 cloudinary
 redis
 celery[redis]
-python-amazon-paapi
 openai
+
+https://webservices.amazon.com/paapi5/documentation/assets/archives/paapi5-python-sdk-example.zip#subdirectory=paapi5-python-sdk-example

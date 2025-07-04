@@ -5,5 +5,5 @@ class Product(BaseModel):
     title: str
     url: str
     price: str
-    saving: str | None
+    old_price: str | None
 

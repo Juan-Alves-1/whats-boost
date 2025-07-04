@@ -60,7 +60,11 @@ services:
         sync: false
       - key: AMAZON_PARTNER_TAG
         sync: false
-      - key: AMAZON_COUNTRY
+      - key: AMAZON_MARKETPLACE
+        sync: false
+      - key: AMAZON_HOST
+        sync: false
+      - key: AMAZON_REGION
         sync: false
 
       # OpenAI Configuration

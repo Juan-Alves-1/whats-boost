@@ -1,6 +1,15 @@
-from amazon_paapi import AmazonApi
+import re
+
 from app.config import settings
 from app.schemas.product import Product
+
+from app.utils.logger import logger
+
+from paapi5_python_sdk.api.default_api import DefaultApi
+from paapi5_python_sdk.models.get_items_request import GetItemsRequest
+from paapi5_python_sdk.models.get_items_resource import GetItemsResource
+from paapi5_python_sdk.models.partner_type import PartnerType
+from paapi5_python_sdk.rest import ApiException
 
 class ProductRepositoryError(Exception):
     """Generic product repository error."""
@@ -21,37 +30,83 @@ class ProductNotFound(ProductRepositoryError):
 
 class ProductRepository:
     setting: settings.Settings
-    amazon: AmazonApi
+    amazon_api: DefaultApi
 
     def __init__(self, setting: settings.Settings):
         self.setting = setting
 
-        self.amazon = AmazonApi(
-            self.setting.AMAZON_ACCESS_KEY,
-            self.setting.AMAZON_SECRET_KEY,
-            self.setting.AMAZON_PARTNER_TAG,
-            self.setting.AMAZON_COUNTRY,  # pyright:ignore
+        host = "webservices.amazon.com.br"
+        region = "us-east-1"
+
+        amazon_api = DefaultApi(
+            access_key=self.setting.AMAZON_ACCESS_KEY,
+            secret_key=self.setting.AMAZON_SECRET_KEY,
+            host=self.setting.AMAZON_HOST,
+            region=self.setting.AMAZON_REGION,
         )
+
+        self.amazon_api = amazon_api
+
+    @staticmethod
+    def _extract_asin(url: str) -> str:
+        """Pull the 10-char ASIN out of an Amazon URL."""
+        m = re.search(r"/([A-Z0-9]{10})(?:[/?]|$)", url)
+        if not m:
+            raise ProductRepositoryError(f"Could not extract ASIN from URL: {url}")
+
+        return m.group(1)
 
     def get_product_by_url(self, url: str) -> Product:
         try:
-            item = self.amazon.get_items(url)[0]
+            logger.info("Fetching product from URL: %s", url)
+
+            asin = ProductRepository._extract_asin(url)
+            logger.debug("Extracted ASIN: %s", asin)
+
+            request = GetItemsRequest(
+                partner_tag=self.setting.AMAZON_PARTNER_TAG,
+                partner_type=PartnerType.ASSOCIATES,
+                marketplace=self.setting.AMAZON_MARKETPLACE,
+                item_ids=[asin],
+                resources=[
+                    GetItemsResource.ITEMINFO_TITLE,
+                    GetItemsResource.IMAGES_PRIMARY_LARGE,
+                    GetItemsResource.OFFERSV2_LISTINGS_PRICE,
+                    GetItemsResource.OFFERSV2_LISTINGS_DEALDETAILS,
+                ],
+            )
+
+            response = self.amazon_api.get_items(request)
+            logger.info("Received response for ASIN: %s", asin)
+
+            item = response.items_result.items[0]
 
             image = item.images.primary.large.url
             title = item.item_info.title.display_value
-            url = item.detail_page_url
+            detail_url = item.detail_page_url
 
-            if item.offers.listings == None:
-                raise ProductRepositoryError(f"This product doesn't have a listing")
+            logger.debug("Parsed item - Title: %s, Image: %s, URL: %s", title, image, detail_url)
 
-            price = item.offers.listings[0].price.display_amount
+            listing = item.offers_v2.listings[0]
+            price_info = listing.get('Price', {}).get('Money', {})
+            price = price_info.get('DisplayAmount')
 
-            saving = None
-            if (item.offers.listings[0].price.savings) != None: 
-                saving = item.offers.listings[0].price.savings.display_amount
+            logger.debug("Item price: %s for ASIN: %s", price, asin)
 
-            return Product(image=image, title=title, url=url, price=price, saving=saving)
+            saving_info = listing.get('Price', {}).get('Savings', {}).get('Money')
+            saving = saving_info.get('DisplayAmount') if saving_info else None
+
+            logger.info("Successfully converted item to Product: %s", asin)
+
+            return Product(image=image, title=title, url=detail_url, price=price, saving=saving)
+
+        except ApiException as e:
+            msg = f"Amazon API Exception (status={e.status})"
+            logger.error(msg)
+            raise ProductRepositoryError(msg) from e
+
         except Exception as e:
-            raise ProductRepositoryError(f"An unexpected error occurred: {str(e)}")
-
+            msg = f"Unexpected error ({type(e).__name__}): {e}"
+            logger.exception(msg)
+            raise ProductRepositoryError(msg) from e
 

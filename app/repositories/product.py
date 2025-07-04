@@ -4,6 +4,7 @@ from app.config import settings
 from app.schemas.product import Product
 
 from app.utils.logger import logger
+from app.utils.url_shortener import create_amazon_shortlink
 
 from paapi5_python_sdk.api.default_api import DefaultApi
 from paapi5_python_sdk.models.get_items_request import GetItemsRequest
@@ -82,7 +83,10 @@ class ProductRepository:
             title = item.item_info.title.display_value
             detail_url = item.detail_page_url
 
+
             logger.debug("Parsed item - Title: %s, Image: %s, URL: %s", title, image, detail_url)
+
+            short_url = create_amazon_shortlink(title, detail_url)
 
             listing = item.offers_v2.listings[0]
             price_section = listing.get('Price', {})
@@ -95,7 +99,7 @@ class ProductRepository:
             
             logger.info("Successfully converted item to Product: %s", asin)
 
-            return Product(image=image, title=title, url=detail_url, price=current_price, old_price=old_price)
+            return Product(image=image, title=title, url=short_url, price=current_price, old_price=old_price)
 
         except ApiException as e:
             msg = f"Amazon API Exception (status={e.status})"

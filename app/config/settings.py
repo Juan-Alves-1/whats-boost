@@ -36,6 +36,12 @@ class Settings(BaseSettings):
     AMAZON_HOST: str
     AMAZON_REGION: str
 
+    BTN_SESSION: str
+    BTN_SESSION_SIG: str
+    BTN_LOGGED_IN: str
+    BTN_LOGGED_IN_SIG: str
+    BTN_PROFILE_REMINDER: str
+
     OPENAI_HOST: str
     OPENAI_KEY: str
     OPENAI_MODEL: str

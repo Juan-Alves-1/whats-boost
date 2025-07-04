@@ -32,7 +32,6 @@ class Settings(BaseSettings):
     AMAZON_ACCESS_KEY: str
     AMAZON_SECRET_KEY: str
     AMAZON_PARTNER_TAG: str
-
     AMAZON_MARKETPLACE: str
     AMAZON_HOST: str
     AMAZON_REGION: str

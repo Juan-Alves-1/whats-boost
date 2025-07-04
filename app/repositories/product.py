@@ -35,9 +35,6 @@ class ProductRepository:
     def __init__(self, setting: settings.Settings):
         self.setting = setting
 
-        host = "webservices.amazon.com.br"
-        region = "us-east-1"
-
         amazon_api = DefaultApi(
             access_key=self.setting.AMAZON_ACCESS_KEY,
             secret_key=self.setting.AMAZON_SECRET_KEY,
@@ -88,17 +85,17 @@ class ProductRepository:
             logger.debug("Parsed item - Title: %s, Image: %s, URL: %s", title, image, detail_url)
 
             listing = item.offers_v2.listings[0]
-            price_info = listing.get('Price', {}).get('Money', {})
-            price = price_info.get('DisplayAmount')
+            price_section = listing.get('Price', {})
+            current_price = price_section.get('Money', {}).get('DisplayAmount')
+            
+            logger.debug("Item price: %s for ASIN: %s", current_price, asin)
 
-            logger.debug("Item price: %s for ASIN: %s", price, asin)
-
-            saving_info = listing.get('Price', {}).get('Savings', {}).get('Money')
-            saving = saving_info.get('DisplayAmount') if saving_info else None
-
+            saving_basis = price_section.get('SavingBasis', {}).get('Money')
+            old_price = saving_basis.get('DisplayAmount') if saving_basis else None
+            
             logger.info("Successfully converted item to Product: %s", asin)
 
-            return Product(image=image, title=title, url=detail_url, price=price, saving=saving)
+            return Product(image=image, title=title, url=detail_url, price=current_price, old_price=old_price)
 
         except ApiException as e:
             msg = f"Amazon API Exception (status={e.status})"
@@ -109,4 +106,3 @@ class ProductRepository:
             msg = f"Unexpected error ({type(e).__name__}): {e}"
             logger.exception(msg)
             raise ProductRepositoryError(msg) from e
-

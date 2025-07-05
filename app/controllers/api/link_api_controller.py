@@ -3,8 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, HttpUrl
 
 from app.repositories.openai import OpenAIAPIError, OpenAIRateLimitError, OpenAIRepositoryError, get_openai_repository
-from app.marketplace.marketplace import MarketplaceException
-from app.marketplace.amazon import get_amazon_marketplace
+from app.marketplaces.marketplace import MarketplaceException
+from app.marketplaces.amazon import get_amazon_marketplace
 from app.dependencies.auth import auth_required
 
 router = APIRouter()

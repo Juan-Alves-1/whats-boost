@@ -2,6 +2,9 @@ from openai import OpenAI
 from app.schemas.product import Product
 from app.config import settings
 
+async def get_openai_repository():
+    return OpenAIRepository(settings.settings)
+
 class OpenAIRepositoryError(Exception):
     """Generic OpenAI repository error."""
 
@@ -29,9 +32,23 @@ class OpenAIRepository:
     setting: settings.Settings
     client: OpenAI
 
+    _initialized = False
+    _instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+
+        return cls._instance
+
     def __init__(self, setting: settings.Settings):
+        if self._initialized:
+            return
+
         self.setting = setting
         self.client = OpenAI(base_url=setting.OPENAI_HOST, api_key=setting.OPENAI_KEY)
+
+        self._initialized = True
 
     def _create_promotional_prompt(
         self, product: Product, max_len: int, style: str

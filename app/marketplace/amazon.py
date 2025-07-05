@@ -14,11 +14,26 @@ from paapi5_python_sdk.models.get_items_resource import GetItemsResource
 from paapi5_python_sdk.models.partner_type import PartnerType
 from paapi5_python_sdk.rest import ApiException
 
+async def get_amazon_marketplace():
+    return AmazonMarketplace(settings.settings)
+
 class AmazonMarketplace(Marketplace):
     setting: settings.Settings
     amazon_api: DefaultApi
 
+    _instance = None
+    _initialized = False
+
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+
+        return cls._instance
+
     def __init__(self, setting: settings.Settings):
+        if self._initialized:
+            return
+
         self.setting = setting
 
         amazon_api = DefaultApi(
@@ -29,6 +44,8 @@ class AmazonMarketplace(Marketplace):
         )
 
         self.amazon_api = amazon_api
+
+        self._initialized = True
 
     @staticmethod
     def _extract_asin(url: str) -> str:

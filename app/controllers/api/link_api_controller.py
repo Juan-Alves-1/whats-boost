@@ -1,17 +1,11 @@
 from fastapi import HTTPException, status, Depends
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, HttpUrl
-from app.config import settings
-from app.repositories.openai import OpenAIAPIError, OpenAIRateLimitError, OpenAIRepository, OpenAIRepositoryError
-from app.marketplace.amazon import AmazonMarketplace
+
+from app.repositories.openai import OpenAIAPIError, OpenAIRateLimitError, OpenAIRepositoryError, get_openai_repository
 from app.marketplace.marketplace import MarketplaceException
+from app.marketplace.amazon import get_amazon_marketplace
 from app.dependencies.auth import auth_required
-
-# TODO: Move this definition to a more appropriate location.
-amazon_marketplace: AmazonMarketplace = AmazonMarketplace(settings.settings)
-
-# TODO: Move this definition to a more appropriate location.
-openai_repository: OpenAIRepository = OpenAIRepository(settings.settings)
 
 router = APIRouter()
 
@@ -27,7 +21,9 @@ class LinkOutput(BaseModel):
 @router.post("/api/v1/messages/link", name="link_message")
 async def link(
     input: LinkInput,
-    user=Depends(auth_required)
+    user=Depends(auth_required),
+    amazon_marketplace=Depends(get_amazon_marketplace),
+    openai_repository=Depends(get_openai_repository)
 ) -> LinkOutput:
     try:
         product = amazon_marketplace.get_product(str(input.url))

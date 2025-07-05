@@ -10,7 +10,6 @@ def create_amazon_shortlink(name: str, long_url: str) -> str:
         "Content-Type": "application/json",
         "Origin":       "https://creators.posttap.com",
         "Referer":      "https://creators.posttap.com/",
-        "User-Agent":   "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) ", 
         "Cookie":( 
             f"btn_session={settings.BTN_SESSION};"
             f"btn_session.sig={settings.BTN_SESSION_SIG};"

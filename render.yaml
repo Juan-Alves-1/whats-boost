@@ -67,6 +67,18 @@ services:
       - key: AMAZON_REGION
         sync: false
 
+      # PostTap Configuration
+      - key: BTN_SESSION
+        sync: false
+      - key: BTN_SESSION_SIG
+        sync: false
+      - key: BTN_LOGGED_IN
+        sync: false
+      - key: BTN_LOGGED_IN_SIG
+        sync: false
+      - key: BTN_PROFILE_REMINDER
+        sync: false
+
       # OpenAI Configuration
       - key: OPENAI_HOST
         sync: false

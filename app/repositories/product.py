@@ -83,7 +83,6 @@ class ProductRepository:
             title = item.item_info.title.display_value
             detail_url = item.detail_page_url
 
-
             logger.debug("Parsed item - Title: %s, Image: %s, URL: %s", title, image, detail_url)
 
             short_url = create_amazon_shortlink(title, detail_url)

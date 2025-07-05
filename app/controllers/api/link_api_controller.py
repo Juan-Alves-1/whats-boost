@@ -1,13 +1,14 @@
 from fastapi import HTTPException, status, Depends
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, HttpUrl
 from app.config import settings
 from app.repositories.openai import OpenAIAPIError, OpenAIRateLimitError, OpenAIRepository, OpenAIRepositoryError
-from app.repositories.product import ProductRepository, ProductNotFound, ProductRepositoryError
+from app.marketplace.amazon import AmazonMarketplace
+from app.marketplace.marketplace import MarketplaceException
 from app.dependencies.auth import auth_required
 
 # TODO: Move this definition to a more appropriate location.
-product_repository: ProductRepository = ProductRepository(settings.settings)
+amazon_marketplace: AmazonMarketplace = AmazonMarketplace(settings.settings)
 
 # TODO: Move this definition to a more appropriate location.
 openai_repository: OpenAIRepository = OpenAIRepository(settings.settings)
@@ -29,19 +30,16 @@ async def link(
     user=Depends(auth_required)
 ) -> LinkOutput:
     try:
-        product = product_repository.get_product_by_url(str(input.url))
-
-        message = openai_repository.generate_promotional_message(product)
-
-        return LinkOutput(image=product.image, message=message)
-
-    except ProductNotFound as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-
-    except ProductRepositoryError as e:
+        product = amazon_marketplace.get_product(str(input.url))
+    except MarketplaceException as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
         )
+
+    try:
+        message = openai_repository.generate_promotional_message(product)
+
+        return LinkOutput(image=product.image, message=message)
 
     except OpenAIRateLimitError as e:
         raise HTTPException(

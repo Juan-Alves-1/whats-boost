@@ -1,8 +1,10 @@
 import re
 
+from .marketplace import Marketplace
+from .marketplace import MarketplaceException
+
 from app.config import settings
 from app.schemas.product import Product
-
 from app.utils.logger import logger
 from app.utils.url_shortener import create_amazon_shortlink
 
@@ -12,24 +14,7 @@ from paapi5_python_sdk.models.get_items_resource import GetItemsResource
 from paapi5_python_sdk.models.partner_type import PartnerType
 from paapi5_python_sdk.rest import ApiException
 
-class ProductRepositoryError(Exception):
-    """Generic product repository error."""
-
-    def __init__(
-        self,
-        message="An unexpected error occurred while accessing the product repository.",
-    ):
-        super().__init__(message)
-
-
-class ProductNotFound(ProductRepositoryError):
-    """Raised when a product is not found (HTTP 404)."""
-
-    def __init__(self, url: str):
-        super().__init__(f"Product not found at URL: {url}")
-
-
-class ProductRepository:
+class AmazonMarketplace(Marketplace):
     setting: settings.Settings
     amazon_api: DefaultApi
 
@@ -50,15 +35,15 @@ class ProductRepository:
         """Pull the 10-char ASIN out of an Amazon URL."""
         m = re.search(r"/([A-Z0-9]{10})(?:[/?]|$)", url)
         if not m:
-            raise ProductRepositoryError(f"Could not extract ASIN from URL: {url}")
+            raise MarketplaceException(f"Could not extract ASIN from URL: {url}")
 
         return m.group(1)
 
-    def get_product_by_url(self, url: str) -> Product:
+    def get_product(self, url: str) -> Product:
         try:
-            logger.info("Fetching product from URL: %s", url)
+            logger.info(f"Fetching product from URL: {url}")
 
-            asin = ProductRepository._extract_asin(url)
+            asin = AmazonMarketplace._extract_asin(url)
             logger.debug("Extracted ASIN: %s", asin)
 
             request = GetItemsRequest(
@@ -75,15 +60,22 @@ class ProductRepository:
             )
 
             response = self.amazon_api.get_items(request)
-            logger.info("Received response for ASIN: %s", asin)
+            logger.info(f"Received response for ASIN: {asin}")
 
-            item = response.items_result.items[0]
+        except ApiException as e:
+            msg = f"Amazon API Exception (status={e.status})"
+            logger.error(msg)
+
+            raise MarketplaceException(msg) from e
+
+        try:
+            item = response.items_result.items[0] #pyright: ignore
 
             image = item.images.primary.large.url
             title = item.item_info.title.display_value
             detail_url = item.detail_page_url
 
-            logger.debug("Parsed item - Title: %s, Image: %s, URL: %s", title, image, detail_url)
+            logger.debug(f"Parsed item - Title: {title}, Image: {image}, URL: {detail_url}")
 
             short_url = create_amazon_shortlink(title, detail_url)
 
@@ -91,21 +83,16 @@ class ProductRepository:
             price_section = listing.get('Price', {})
             current_price = price_section.get('Money', {}).get('DisplayAmount')
             
-            logger.debug("Item price: %s for ASIN: %s", current_price, asin)
+            logger.debug(f"Item price: {current_price} for ASIN: {asin}")
 
             saving_basis = price_section.get('SavingBasis', {}).get('Money')
             old_price = saving_basis.get('DisplayAmount') if saving_basis else None
             
-            logger.info("Successfully converted item to Product: %s", asin)
+            logger.info(f"Successfully converted item to Product: {asin}")
 
             return Product(image=image, title=title, url=short_url, price=current_price, old_price=old_price)
-
-        except ApiException as e:
-            msg = f"Amazon API Exception (status={e.status})"
-            logger.error(msg)
-            raise ProductRepositoryError(msg) from e
 
         except Exception as e:
             msg = f"Unexpected error ({type(e).__name__}): {e}"
             logger.exception(msg)
-            raise ProductRepositoryError(msg) from e
+            raise MarketplaceException(msg) from e

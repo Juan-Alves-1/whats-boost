@@ -1,16 +1,11 @@
 from fastapi import HTTPException, status, Depends
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, HttpUrl
-from app.config import settings
-from app.repositories.openai import OpenAIAPIError, OpenAIRateLimitError, OpenAIRepository, OpenAIRepositoryError
-from app.repositories.product import ProductRepository, ProductNotFound, ProductRepositoryError
+
+from app.repositories.openai import OpenAIAPIError, OpenAIRateLimitError, OpenAIRepositoryError, get_openai_repository
+from app.marketplaces.marketplace import MarketplaceException
+from app.marketplaces.amazon import AmazonMarketplaceInvalidURLException, get_amazon_marketplace
 from app.dependencies.auth import auth_required
-
-# TODO: Move this definition to a more appropriate location.
-product_repository: ProductRepository = ProductRepository(settings.settings)
-
-# TODO: Move this definition to a more appropriate location.
-openai_repository: OpenAIRepository = OpenAIRepository(settings.settings)
 
 router = APIRouter()
 
@@ -26,22 +21,27 @@ class LinkOutput(BaseModel):
 @router.post("/api/v1/messages/link", name="link_message")
 async def link(
     input: LinkInput,
-    user=Depends(auth_required)
+    user=Depends(auth_required),
+    amazon_marketplace=Depends(get_amazon_marketplace),
+    openai_repository=Depends(get_openai_repository)
 ) -> LinkOutput:
     try:
-        product = product_repository.get_product_by_url(str(input.url))
+        product = amazon_marketplace.get_product(str(input.url))
 
-        message = openai_repository.generate_promotional_message(product)
+    except AmazonMarketplaceInvalidURLException as e:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail=str(e)
+        )
 
-        return LinkOutput(image=product.image, message=message)
-
-    except ProductNotFound as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-
-    except ProductRepositoryError as e:
+    except MarketplaceException as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
         )
+
+    try:
+        message = openai_repository.generate_promotional_message(product)
+
+        return LinkOutput(image=product.image, message=message)
 
     except OpenAIRateLimitError as e:
         raise HTTPException(

@@ -4,7 +4,7 @@ from pydantic import BaseModel, HttpUrl
 
 from app.repositories.openai import OpenAIAPIError, OpenAIRateLimitError, OpenAIRepositoryError, get_openai_repository
 from app.marketplaces.marketplace import MarketplaceException
-from app.marketplaces.amazon import get_amazon_marketplace
+from app.marketplaces.amazon import AmazonMarketplaceInvalidURLException, get_amazon_marketplace
 from app.dependencies.auth import auth_required
 
 router = APIRouter()
@@ -27,6 +27,12 @@ async def link(
 ) -> LinkOutput:
     try:
         product = amazon_marketplace.get_product(str(input.url))
+
+    except AmazonMarketplaceInvalidURLException as e:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail=str(e)
+        )
+
     except MarketplaceException as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)

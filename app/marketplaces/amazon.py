@@ -17,6 +17,14 @@ from paapi5_python_sdk.rest import ApiException
 async def get_amazon_marketplace():
     return AmazonMarketplace(settings.settings)
 
+
+class AmazonMarketplaceInvalidURLException(MarketplaceException):
+    def __init__(
+        self,
+        message="URL provided isn't from Amazon",
+    ):
+        super().__init__(message)
+
 class AmazonMarketplace(Marketplace):
     setting: settings.Settings
     amazon_api: DefaultApi
@@ -56,7 +64,14 @@ class AmazonMarketplace(Marketplace):
 
         return m.group(1)
 
+    @staticmethod
+    def _is_amazon_brazil(url: str) -> bool:
+        return len(re.findall(r"^https://www\.amazon\.com\.br.*", url)) > 0
+
     def get_product(self, url: str) -> Product:
+        if not AmazonMarketplace._is_amazon_brazil(url):
+            raise AmazonMarketplaceInvalidURLException()
+
         try:
             logger.info(f"Fetching product from URL: {url}")
 

@@ -4,9 +4,10 @@ __pycache__/
 *$py.class
 
 # Virtual environment
-venv/
+.venv/
 .env
-.env.*  # optional: if you use .env.dev, .env.prod, etc.
+.env.dev
+.env.prod
 
 # IDEs/editors
 .vscode/

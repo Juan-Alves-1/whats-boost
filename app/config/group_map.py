@@ -48,5 +48,5 @@ GROUP_IDS = {
     "Novos Produtos Alertas": "120363399931636649@g.us",
     "Novos Produtos 11": "120363422506037010@g.us",
     "Novos Produtos alertas promos": "120363400532731225@g.us",
-    "Grupo promos e cupons2": " ",
+    "Grupo promos e cupons2": "120363401556607075@g.us",
 }

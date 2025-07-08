@@ -1,6 +1,6 @@
 from httpx import HTTPStatusError
 from app.config.settings import settings
-from .http_client import shared_http_client
+from .http_client import url_shortener_client
 from app.utils.logger import logger
 
 def create_amazon_shortlink(name: str, long_url: str) -> str:
@@ -18,10 +18,10 @@ def create_amazon_shortlink(name: str, long_url: str) -> str:
             f"btn_profile_reminder={settings.BTN_PROFILE_REMINDER}"
         ),
     }
-    payload = {"name": name, "url": long_url}
+    payload = {"name": name[:100], "url": long_url}
 
     try:
-        response = shared_http_client.post(endpoint, json=payload, headers=headers)
+        response = url_shortener_client.post(endpoint, json=payload, headers=headers)
         response.raise_for_status()
         data = response.json()
     except HTTPStatusError as exc:

@@ -6,6 +6,7 @@ from app.utils.logger import logger
 from app.services.send_media import send_media_message
 import random
 import json
+import httpx
 
 # Auxiliary function with Lua script for atomic queue check on Redis
 def is_queue_under_limit(queue_key: str, max_size: int) -> bool:
@@ -93,7 +94,6 @@ def send_user_media_batch(payload: dict): # rename to enqueue
     email = payload["user_email"]
 
     try:
-
         total_server_delay = 0
         inter_message_buffer = 1
         min_delay_ms, max_delay_ms = get_typing_range_ms(caption)
@@ -148,6 +148,10 @@ def send_media_message_subtask(self, group_id, caption, media_url, evo_delay_ms,
 
         return result
     
+    except httpx.ReadTimeout as exc:
+        logger.warning(f"🔁 ReadTimeout for group ID: {group_id}. Retrying via Celery in {self.default_retry_delay} seconds | Retry #{self.request.retries + 1}...")
+        raise self.retry(exc=exc, countdown=self.default_retry_delay)
+    
     except MaxRetriesExceededError:
         logger.error(f"🚫 Max retries exceeded for {group_id}")
         return {"group_id": group_id, "success": False, "error": "Max retries exceeded"}
@@ -155,9 +159,13 @@ def send_media_message_subtask(self, group_id, caption, media_url, evo_delay_ms,
     except Retry:
         raise  # CRITICAL — let Celery handle its own Retry
 
-    except Exception as e:
-        logger.exception(f"🔥 Failed EVO API call for {group_id}: {e}")
-        return {"group_id": group_id, "success": False, "error": str(e)}
+    except Exception as exc:
+            logger.exception(f"🔥 Unexpected error for {group_id}: {exc}")
+            return {
+                "group_id": group_id,
+                "success": False,
+                "error": str(exc)
+            }
     
 '''
     Step 4 - auxilary task:

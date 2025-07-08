@@ -6,7 +6,8 @@ __pycache__/
 # Virtual environment
 .venv/
 .env
-.env.*  # optional: if you use .env.dev, .env.prod, etc.
+.env.dev
+.env.prod
 
 # IDEs/editors
 .vscode/

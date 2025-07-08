@@ -92,7 +92,7 @@ services:
     dockerContext: .
     dockerfilePath: Dockerfile.worker
     name: worker
-    plan: free
+    plan: starter
     envVars:
       - key: REDIS_URL
         fromService:

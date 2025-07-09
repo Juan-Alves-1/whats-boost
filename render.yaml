@@ -11,17 +11,17 @@ services:
         fromService:
           type: keyvalue
           name: keyvalue
-          property: host
+          property: connectionString
       - key: CELERY_BROKER_URL
         fromService:
           type: keyvalue
           name: keyvalue
-          property: host
+          property: connectionString
       - key: CELERY_RESULT_BACKEND
         fromService:
           type: keyvalue
           name: keyvalue
-          property: host
+          property: connectionString
       - key: ENV
         value: production
       - key: HOST
@@ -98,17 +98,17 @@ services:
         fromService:
           type: keyvalue
           name: keyvalue
-          property: host
+          property: connectionString
       - key: CELERY_BROKER_URL
         fromService:
           type: keyvalue
           name: keyvalue
-          property: host
+          property: connectionString
       - key: CELERY_RESULT_BACKEND
         fromService:
           type: keyvalue
           name: keyvalue
-          property: host
+          property: connectionString
       - key: SECRET_KEY
         sync: false
       - key: GOOGLE_CLIENT_ID

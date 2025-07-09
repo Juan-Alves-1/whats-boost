@@ -44,6 +44,7 @@ media_validation_client = httpx.Client(
 
 url_shortener_client = httpx.Client(
     http2=False,  
+    follow_redirects=True,
     timeout=httpx.Timeout(
         connect=5.0,
         read=30.0,  
@@ -51,8 +52,8 @@ url_shortener_client = httpx.Client(
         pool=10.0
     ),
     limits=httpx.Limits(
-        max_connections=10,
-        max_keepalive_connections=2
+        max_connections=15,
+        max_keepalive_connections=5
     ),
     event_hooks={"request": [_on_request], "response": [_on_response]},
     trust_env=False,

@@ -1,9 +1,10 @@
 import re
-
+import httpx
 from app.config import settings
 from app.schemas.product import Product
 
 from app.utils.logger import logger
+from app.utils.http_client import url_shortener_client
 from app.utils.url_shortener import create_amazon_shortlink
 
 from paapi5_python_sdk.api.default_api import DefaultApi
@@ -46,6 +47,15 @@ class ProductRepository:
         self.amazon_api = amazon_api
 
     @staticmethod
+    def _resolve_redirect(url: str) -> str:
+        try:
+            response = url_shortener_client.get(url)
+            return str(response.url) 
+        except httpx.RequestError as e:
+            logger.warning("Failed to resolve redirect for %s: %s", url, str(e))
+            raise ProductRepositoryError(f"Error resolving redirect for URL: {url}. Details: {str(e)}")
+    
+    @staticmethod
     def _extract_asin(url: str) -> str:
         """Pull the 10-char ASIN out of an Amazon URL."""
         m = re.search(r"/([A-Z0-9]{10})(?:[/?]|$)", url)
@@ -57,6 +67,10 @@ class ProductRepository:
     def get_product_by_url(self, url: str) -> Product:
         try:
             logger.info("Fetching product from URL: %s", url)
+
+            if "amzn.to" in url or "amazn.com" in url:
+                logger.info("Shortened URL detected. Resolving...")
+                url = ProductRepository._resolve_redirect(url)  
 
             asin = ProductRepository._extract_asin(url)
             logger.debug("Extracted ASIN: %s", asin)

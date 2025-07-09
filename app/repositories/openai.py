@@ -97,7 +97,9 @@ class OpenAIRepository:
                 2. BENEFIT (optional) 
                     - Up to one line describing a key selling point 
                 3. PRICES (required) 
-                    - Old price (struck through) and new price (bold) 
+                    - Old price (struck through) and lowest price (bold) 
+                    OR
+                    - Only lowest price (bold)
                 4. LINK (required)
                     - Link direto da promo: full affiliate URL
             
@@ -111,7 +113,7 @@ class OpenAIRepository:
                     Example 2:
                         "Nivea Hidratante Milk 200ml \n\n"
                         "Deixa sua pele macia como um toque de seda! \n\n"
-                        "~De R$ 17~ por apenas *R$ 12* 😱 \n\n"
+                        "Por apenas *R$ 12* 😱 \n\n"
                         "Link direto da promo: https://amzlink.to/example"
 
             Constraints:  

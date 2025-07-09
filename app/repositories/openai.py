@@ -52,9 +52,9 @@ class OpenAIRepository:
         Create a promotional WhatsApp copy according to the following product details:
 
         - Product title: {product.title}
-        - Price: {product.price}
+        - Current price: {product.price}
         - Previous price: {product.old_price}
-        - Product URL: {product.url}
+        - Link direto da promo: {product.url}
         - Style: {style_instruction}
         - Maximum size: {max_len} characters
 
@@ -92,29 +92,27 @@ class OpenAIRepository:
             Your Tone of Voice is punchy, concise, emoji-rich, sometimes a bit sassy or playful, but never spammy. 
 
             Follow the template below and use **two** consecutive newline characters (`\n\n`) to separate each section of your message:
-                1. HEADLINE (optional) 
-                    - A one-to-five-word, attention-grabbing phrase
-                2. PRODUCT BLOCK (required) 
-                    - Review typos and then include the product name  
+                1. PRODUCT TITLE SUMMARY (required) 
+                    - a sum of the product title
+                2. BENEFIT (optional) 
+                    - Up to one line describing a key selling point 
+                3. PRICES (required) 
                     - Old price (struck through) and new price (bold) 
-                3. BENEFIT (optional) 
-                    - One line describing a key selling point or urgency 
                 4. CTA & LINK (required)
-                    - A direct call-to-action & full affiliate URL
+                    - Link direto da promo: full affiliate URL
             
                 Examples below according to template aforementioned:
                     Example 1:
-                        "HMMMM COQUINHA GELADA 😋 \n\n" 
-                        "Pack de Coca-Cola sem açucar com 6 unidades (lata de 220ml) \n\n"
-                        "~De R$ 23~ por apenas *R$ 13 \n\n"
+                        "Pack de Coca-Cola sem açucar com 6 unidades \n\n"
+                        "Hmmm... coca geladinha 😋 \n\n" 
+                        "~De R$ 23~ por apenas *R$ 13* \n\n"
                         "Link direto da promo: https://amzlink.to/example"
 
                     Example 2:
-                        "Nivea Hidratante Soft Milk 200ml \n\n"
-                        "Compre em recorrência (cancele quando quiser) \n\n"
-                        "*Por R$ 12* 😱 \n\n"
-                        "Deixa sua pele macia e hidratada como um toque de seda! \n\n"
-                        "Link da promo: https://amzlink.to/example"
+                        "Nivea Hidratante Milk 200ml \n\n"
+                        "Deixa sua pele macia como um toque de seda! \n\n"
+                        "~De R$ 17~ por apenas *R$ 12* 😱 \n\n"
+                        "Link direto da promo: https://amzlink.to/example"
 
             Constraints:  
                 - Only return the WhatsApp message text. No commentary or markdown

@@ -92,18 +92,18 @@ class OpenAIRepository:
             Your Tone of Voice is punchy, concise, emoji-rich, sometimes a bit sassy or playful, but never spammy. 
 
             Follow the template below and use **two** consecutive newline characters (`\n\n`) to separate each section of your message:
-                1. PRODUCT TITLE SUMMARY (required) 
-                    - a sum of the product title
+                1. ONE LINE PRODUCT TITLE SUMMARY (required) 
+                    - Make a summary of the title if longer than 32 characters 
                 2. BENEFIT (optional) 
                     - Up to one line describing a key selling point 
                 3. PRICES (required) 
                     - Old price (struck through) and new price (bold) 
-                4. CTA & LINK (required)
+                4. LINK (required)
                     - Link direto da promo: full affiliate URL
             
                 Examples below according to template aforementioned:
                     Example 1:
-                        "Pack de Coca-Cola sem açucar com 6 unidades \n\n"
+                        "Pack de Coca-Cola sem açucar\n\n"
                         "Hmmm... coca geladinha 😋 \n\n" 
                         "~De R$ 23~ por apenas *R$ 13* \n\n"
                         "Link direto da promo: https://amzlink.to/example"

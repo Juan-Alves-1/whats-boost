@@ -68,7 +68,7 @@ class ProductRepository:
         try:
             logger.info("Fetching product from URL: %s", url)
 
-            if "amzn.to" in url or "amazn.com" in url:
+            if "amzn.to" in url or "amazn.com" in url or "amzlink.to" in url:
                 logger.info("Shortened URL detected. Resolving...")
                 url = ProductRepository._resolve_redirect(url)  
 

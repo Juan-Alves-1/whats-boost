@@ -129,7 +129,7 @@ def send_user_media_batch(payload: dict): # rename to enqueue
             - Then get access to self.retry(), self.request, self.name
         - Implement retry attempt here
 '''
-@celery.task(bind=True, max_retries=2, default_retry_delay=8)
+@celery.task(bind=True, max_retries=1, default_retry_delay=8)
 def send_media_message_subtask(self, group_id, caption, media_url, evo_delay_ms, mediatype, mimetype):
     try:
         logger.info(f"🎯 Starting EVO API call to {group_id}")

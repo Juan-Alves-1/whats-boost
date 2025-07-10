@@ -13,7 +13,6 @@ def send_media_message(group_id: str, caption: str, media_url: str, evo_delay_ms
         "mimetype": mimetype,
         "caption": caption,
         "media": media_url,
-        "linkPreview": True,
     }
     headers = {
         "apikey": settings.EVO_API_KEY,

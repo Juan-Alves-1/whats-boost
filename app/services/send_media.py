@@ -10,12 +10,8 @@ def send_media_message(group_id: str, caption: str, media_url: str, evo_delay_ms
     payload = {
         "number": group_id,
         "mediatype": mediatype,
-        "mimetype": mimetype,
         "caption": caption,
         "media": media_url,
-        "delay": evo_delay_ms,
-        "linkPreview": True,
-        "mentionsEveryOne": False
     }
     headers = {
         "apikey": settings.EVO_API_KEY,

@@ -95,7 +95,6 @@ def send_user_media_batch(payload: dict): # rename to enqueue
 
     try:
         total_server_delay = 0
-        inter_message_buffer = 1
         min_delay_ms, max_delay_ms = get_typing_range_ms(caption)
 
         logger.info(f"⛓️ Dispatching {len(group_ids)} subtasks with staggered delays")
@@ -108,7 +107,7 @@ def send_user_media_batch(payload: dict): # rename to enqueue
                 group_id, caption, media_url, evo_delay, mediatype, mimetype
             ).apply_async(countdown=delay_sec)  # run task x seconds after queueing
 
-            total_server_delay += (evo_delay // 1000) + inter_message_buffer # following task receives the previous delay set
+            total_server_delay += (evo_delay // 1000) # following task receives the previous delay set
         
         logger.info(f"⏱️ Estimated total batch time for {len(group_ids)} groups: {int(total_server_delay)}s")
 

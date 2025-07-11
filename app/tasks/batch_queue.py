@@ -111,7 +111,7 @@ def send_user_media_batch(payload: dict): # rename to enqueue
         
         logger.info(f"⏱️ Estimated total batch time for {len(group_ids)} groups: {int(total_server_delay)}s")
 
-        estimated_lock_time = total_server_delay + 30
+        estimated_lock_time = total_server_delay + 60
         logger.info(f"🔓 Scheduling lock release in {int(total_server_delay)} seconds for user {email}")
 
         release_and_check_queue.apply_async(args=[email], countdown=estimated_lock_time) # Lock is expected to be reased when all subtasks finish (so no overlaps)

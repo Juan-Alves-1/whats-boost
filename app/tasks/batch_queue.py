@@ -129,7 +129,7 @@ def send_user_media_batch(payload: dict): # rename to enqueue
             - Then get access to self.retry(), self.request, self.name
         - Implement retry attempt here
 '''
-@celery.task(bind=True, max_retries=1, default_retry_delay=8)
+@celery.task(bind=True, max_retries=1, default_retry_delay=3)
 def send_media_message_subtask(self, group_id, caption, media_url, evo_delay_ms, mediatype, mimetype):
     try:
         logger.info(f"🎯 Starting EVO API call to {group_id}")
@@ -154,18 +154,14 @@ def send_media_message_subtask(self, group_id, caption, media_url, evo_delay_ms,
     
     except MaxRetriesExceededError:
         logger.error(f"🚫 Max retries exceeded for {group_id}")
-        return {"group_id": group_id, "success": False, "error": "Max retries exceeded"}
+        raise
 
     except Retry:
         raise  # CRITICAL — let Celery handle its own Retry
 
     except Exception as exc:
             logger.exception(f"🔥 Unexpected error for {group_id}: {exc}")
-            return {
-                "group_id": group_id,
-                "success": False,
-                "error": str(exc)
-            }
+            raise
     
 '''
     Step 4 - auxilary task:

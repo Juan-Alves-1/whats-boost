@@ -96,6 +96,7 @@ def send_user_media_batch(payload: dict): # rename to enqueue
     try:
         total_server_delay = 0
         min_delay_ms, max_delay_ms = get_typing_range_ms(caption)
+        extra_buffer = 0.2
 
         logger.info(f"⛓️ Dispatching {len(group_ids)} subtasks with staggered delays")
         for group_id in group_ids:
@@ -107,11 +108,11 @@ def send_user_media_batch(payload: dict): # rename to enqueue
                 group_id, caption, media_url, evo_delay, mediatype, mimetype
             ).apply_async(countdown=delay_sec)  # run task x seconds after queueing
 
-            total_server_delay += (evo_delay // 1000) # following task receives the previous delay set
+            total_server_delay += (evo_delay // 1000) + extra_buffer # following task receives the previous delay set
         
         logger.info(f"⏱️ Estimated total batch time for {len(group_ids)} groups: {int(total_server_delay)}s")
 
-        estimated_lock_time = total_server_delay + 60
+        estimated_lock_time = total_server_delay + 75
         logger.info(f"🔓 Scheduling lock release in {int(total_server_delay)} seconds for user {email}")
 
         release_and_check_queue.apply_async(args=[email], countdown=estimated_lock_time) # Lock is expected to be reased when all subtasks finish (so no overlaps)

@@ -96,7 +96,7 @@ def send_user_media_batch(payload: dict): # rename to enqueue
     try:
         total_server_delay = 0
         min_delay_ms, max_delay_ms = get_typing_range_ms(caption)
-        extra_buffer = 0.2
+        extra_buffer = 0.4
 
         logger.info(f"⛓️ Dispatching {len(group_ids)} subtasks with staggered delays")
         for group_id in group_ids:

@@ -36,7 +36,6 @@ GROUP_IDS = {
     "Novos Produtos #99": "120363362716815215@g.us",
     "Novos Produtos 35": "120363346757007839@g.us",
     "Novos Produtos 73": "120363351989091092@g.us",
-    "Novos Produtos": "120363316575483948@g.us",
     "Alertas promos novos produtos": "120363417662575831@g.us",
     "Novos Produtos Promos": "120363415186074574@g.us",
     "Promos e cupons🚨": "120363419126831907@g.us",
@@ -52,4 +51,5 @@ GROUP_IDS = {
     "Promos e cupons 30": "120363419911947958@g.us",
     "Promos e cupons": "120363403349513725@g.us",
     "Grupo promos 2": "120363419372904522@g.us",
+    "Promos e alertas": "120363419526187248@g.us"
 }

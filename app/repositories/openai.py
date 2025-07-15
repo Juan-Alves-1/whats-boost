@@ -95,13 +95,13 @@ class OpenAIRepository:
                     Example 1:
                         "Pack de Coca-Cola sem açucar\n\n"
                         "De R$ 23"
-                        "Por apenas R$ 13 \n\n"
+                        "Por R$ 13 \n\n"
                         "🔥 Link direto da promo: https://amzlink.to/example \n\n"
                         "✅ Vagas para entrar no grupo de alerta de brindes e promos. Entre grátis aqui: https://chat.whatsapp.com/Bxdwl5JdKDDEMqNDkfkKmf"
 
                     Example 2:
                         "Pack de Coca-Cola sem açucar\n\n"
-                        "Por apenas R$ 13 \n\n"
+                        "Por R$ 13 \n\n"
                         "🔥 Link direto da promo: https://amzlink.to/example \n\n"
                         "✅ Vagas para entrar no grupo de alerta de brindes e promos. Entre grátis aqui: https://chat.whatsapp.com/Bxdwl5JdKDDEMqNDkfkKmf"
             

@@ -19,8 +19,8 @@ evo_client = httpx.Client(
         pool=10.0
     ),
     limits=httpx.Limits(
-        max_connections=25,          # Total concurrent connections
-        max_keepalive_connections=10  # Connections to keep in pool for reuse
+        max_connections=100,          # Total concurrent connections
+        max_keepalive_connections=25  # Connections to keep in pool for reuse
     ),
     event_hooks={"request": [_on_request], "response": [_on_response]},
     trust_env=False,

@@ -31,7 +31,11 @@ class OpenAIRepository:
 
     def __init__(self, setting: settings.Settings):
         self.setting = setting
-        self.client = OpenAI(base_url=setting.OPENAI_HOST, api_key=setting.OPENAI_KEY)
+        self.client = OpenAI(
+            base_url=setting.OPENAI_HOST, 
+            api_key=setting.OPENAI_KEY,
+            max_retries=1      
+        )
 
     def _create_promotional_prompt(
         self, product: Product, max_len: int,

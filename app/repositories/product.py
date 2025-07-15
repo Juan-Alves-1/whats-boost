@@ -12,6 +12,8 @@ from paapi5_python_sdk.models.get_items_resource import GetItemsResource
 from paapi5_python_sdk.models.partner_type import PartnerType
 from paapi5_python_sdk.rest import ApiException
 
+import httpx
+
 class ProductRepositoryError(Exception):
     """Generic product repository error."""
 
@@ -95,10 +97,80 @@ class ProductRepository:
 
             saving_basis = price_section.get('SavingBasis', {}).get('Money')
             old_price = saving_basis.get('DisplayAmount') if saving_basis else None
-            
+
+            coupon = None
+
+            try:
+                headers = {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                    'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8',
+                    'Accept-Encoding': 'gzip, deflate, br',
+                }
+
+                response = httpx.get(
+                    f"https:/{self.setting.AMAZON_MARKETPLACE}/dp/{asin}",
+                    follow_redirects=True,
+                    timeout=15.0,
+                    headers=headers)
+
+                response.raise_for_status()
+                body = response.text
+
+                code_matches = re.finditer(r'id="promoMessageCXCWpctch[^"]*"[^>]*>\s*(?:Salve\s+o\s+cupom|cupom)\s+(\d+)%:\s*([A-Z0-9]{8})', body, re.IGNORECASE | re.DOTALL)
+                for match in code_matches:
+                    percentage, code = match.groups()
+                    if code and percentage:
+                        logger.info("Found coupon code: %s with %s%% discount", code, percentage)
+
+                        coupon = (code, f"{percentage}%")
+                        break
+
+                if not coupon:
+                    amount_matches = re.finditer(r'Aplicar\s+Cupom\s+de\s+R\$(\d+)', body, re.IGNORECASE)
+                    for match in amount_matches:
+                        amount = match.group(1)
+                        if amount:
+                            logger.info("Found direct discount: R$%s", amount)
+                            coupon = (None, f"R${amount}")
+                            break
+
+                if not coupon:
+                    percent_matches = re.finditer(r'Cupom\s+de\s+(?:desconto\s+de\s+)?(\d+)%', body, re.IGNORECASE)
+                    for match in percent_matches:
+                        percentage = match.group(1)
+                        if percentage:
+                            logger.info("Found percentage discount: %s%%", percentage)
+                            coupon = (None, f"{percentage}%")
+                            break
+
+                if not coupon:
+                    applied_matches = re.finditer(r'Cupom\s+de\s+desconto\s+de\s+R\$(\d+)\s+aplicado', body, re.IGNORECASE)
+                    for match in applied_matches:
+                        amount = match.group(1)
+                        if amount:
+                            logger.info("Found applied discount: R$%s", amount)
+                            coupon = (None, f"R${amount}")
+                            break
+
+                if not coupon:
+                    logger.info("No coupons found for ASIN %s", asin)
+
+            except Exception as e:
+                logger.error("Failed to get coupon code for ASIN %s: %s", asin, e)
+
+                coupon = None
+
             logger.info("Successfully converted item to Product: %s", asin)
 
-            return Product(image=image, title=title, url=short_url, price=current_price, old_price=old_price)
+            return Product(
+                image=image,
+                title=title,
+                url=short_url,
+                price=current_price,
+                old_price=old_price,
+                coupon=coupon
+            )
 
         except ApiException as e:
             msg = f"Amazon API Exception (status={e.status})"

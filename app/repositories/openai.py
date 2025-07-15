@@ -54,6 +54,7 @@ class OpenAIRepository:
         - Product title: {product.title}
         - Price: {product.price}
         - Previous price: {product.old_price}
+        - Coupon: {product.coupon}
         - Product URL: {product.url}
         - Style: {style_instruction}
         - Maximum size: {max_len} characters

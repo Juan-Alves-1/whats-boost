@@ -16,5 +16,6 @@ cloudinary
 redis
 celery[redis]
 openai
+beautifulsoup4
 
 https://webservices.amazon.com/paapi5/documentation/assets/archives/paapi5-python-sdk-example.zip#subdirectory=paapi5-python-sdk-example

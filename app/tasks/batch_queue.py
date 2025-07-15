@@ -96,7 +96,7 @@ def send_user_media_batch(payload: dict): # rename to enqueue
     try:
         total_server_delay = 0
         min_delay_ms, max_delay_ms = get_typing_range_ms(caption)
-        extra_buffer = 0.4
+        extra_buffer = 0.2
 
         logger.info(f"⛓️ Dispatching {len(group_ids)} subtasks with staggered delays")
         for group_id in group_ids:
@@ -142,7 +142,7 @@ def send_media_message_subtask(self, group_id, caption, media_url, evo_delay_ms,
             mimetype=mimetype
         )
 
-        if result.get("response_status") == 400:
+        if result.get("response_status") == 404:
             logger.warning(f"🔁 Status 400 from EVO API for {group_id}. Retrying via Celery in {self.default_retry_delay} seconds | Retry #{self.request.retries + 1}...")
             raise self.retry(exc=Exception("Received 400 status code response from EVO API"), countdown=self.default_retry_delay)
 

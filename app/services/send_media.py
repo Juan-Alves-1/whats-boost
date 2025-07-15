@@ -10,12 +10,12 @@ def send_media_message(group_id: str, caption: str, media_url: str, evo_delay_ms
     payload = {
         "number": group_id,
         "mediatype": mediatype,
-        "mimetype": mimetype,
+        #"mimetype": mimetype,
         "caption": caption,
-        "media": media_url,
-        "delay": evo_delay_ms,
-        "linkPreview": True,
-        "mentionsEveryOne": False
+        "media": media_url
+        #"delay": evo_delay_ms,
+        #"linkPreview": True,
+        #"mentionsEveryOne": False
     }
     headers = {
         "apikey": settings.EVO_API_KEY,
@@ -43,7 +43,7 @@ def send_media_message(group_id: str, caption: str, media_url: str, evo_delay_ms
             status = data.get("status", "UNKNOWN")
             correlation_id = response.headers.get("X-Correlation-Id", "none")
 
-            logger.warning(
+            logger.error(
                 "🛑 EVO 400 for %(group_id)s: url=%(url)s, payload=%(payload)s, "
                 "key.id=%(msg_id)s, timestamp=%(timestamp)s, status=%(status)s, "
                 "correlation_id=%(correlation_id)s, response_body=%(body)s",

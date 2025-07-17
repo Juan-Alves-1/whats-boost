@@ -9,7 +9,7 @@ from app.utils.logger import logger
 # Route Controllers
 from app.controllers import  auth_controller
 from app.controllers.ui import homepage_controller, message_type_ui_controller, text_ui_controller, media_ui_controller
-from app.controllers.api import link_api_controller, text_api_controller, media_api_controller, image_up_api_controller, image_up_logo_api_controller
+from app.controllers.api import link_api_controller, text_api_controller, media_api_controller, image_up_api_controller, image_up_logo_api_controller, webhooks_controller
 
 app = FastAPI(title="WhatsApp Boost Tool")
 
@@ -32,6 +32,8 @@ app.include_router(link_api_controller.router, tags=["API", "Messages"])
 
 app.include_router(image_up_api_controller.router, tags=["API", "Images"]) # Upload image to the provider
 app.include_router(image_up_logo_api_controller.router, tags=["API", "Images"]) # Upload image to the provider
+
+app.include_router(webhooks_controller.router, tags=["API", "Webhooks"]) # Webhook endpoint for receiving messages
 
 def main():
     uvicorn.run(

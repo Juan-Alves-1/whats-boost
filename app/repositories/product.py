@@ -109,3 +109,12 @@ class ProductRepository:
             msg = f"Unexpected error ({type(e).__name__}): {e}"
             logger.exception(msg)
             raise ProductRepositoryError(msg) from e
+
+    def generate_promotional_message(self, product: Product) -> str:
+        """Generate a promotional message for the product."""
+        try:
+            return str(product)
+        except Exception as e:
+            logger.error(f"Error generating promotional message: {e}")
+
+            raise ProductRepositoryError("Failed to generate promotional message") from e

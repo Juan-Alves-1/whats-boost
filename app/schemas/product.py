@@ -6,4 +6,5 @@ class Product(BaseModel):
     url: str
     price: str
     old_price: str | None
+    coupon: tuple[str | None, str] | None
 

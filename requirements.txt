@@ -16,5 +16,9 @@ cloudinary
 redis
 celery[redis]
 openai
+pytest
+pytest-mock
+pytest-asyncio
+pytest-cov
 
 https://webservices.amazon.com/paapi5/documentation/assets/archives/paapi5-python-sdk-example.zip#subdirectory=paapi5-python-sdk-example

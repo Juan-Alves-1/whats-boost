@@ -6,7 +6,6 @@ from app.utils.logger import logger
     Returns (min_delay_ms, max_delay_ms).
 """
 
-
 def get_typing_range_ms(caption: str) -> tuple[int, int]:
     average_typer = 6 
     fast_typer = 8 

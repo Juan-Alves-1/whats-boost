@@ -14,10 +14,10 @@ class bulk_media_payload(BaseModel):
     group_ids: List[GroupID]
     caption: Caption
     media_url: HttpUrl
-    min_delay_sec: Delay = 18
-    max_delay_sec: Delay = 25
+    min_delay_sec: Delay = 10
+    max_delay_sec: Delay = 18
     mediatype: MediaType = "image"
-    mimetype: MimeType = "image/jpg"
+    mimetype: MimeType = "image/png"
 
     @field_validator("caption") # Pydantic v2 method decorator that runs validation logic on a given field before or after standard validation occurs
     @classmethod    # Built-in decorator that allows a method to receive the cls (class itself) instead of an instance (self)

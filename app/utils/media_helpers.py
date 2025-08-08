@@ -1,5 +1,5 @@
 from app.utils.logger import logger
-from app.config.settings import Settings
+from app.config.settings import settings
 
 """
     Estimates a realistic typing delay range for the EVO API 
@@ -8,8 +8,8 @@ from app.config.settings import Settings
 """
 
 def get_typing_range_ms(caption: str) -> tuple[int, int]:
-    min_speed = int(Settings.MIN_TYPING_SPEED)
-    max_speed = int(Settings.MAX_TYPING_SPEED)
+    min_speed = int(settings.MIN_TYPING_SPEED)
+    max_speed = int(settings.MAX_TYPING_SPEED)
     length = len(caption) 
 
     if min_speed <= 0 or max_speed <= 0:

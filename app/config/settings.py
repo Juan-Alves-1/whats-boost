@@ -48,7 +48,6 @@ class Settings(BaseSettings):
 
     MIN_TYPING_SPEED: int = 10
     MAX_TYPING_SPEED: int = 18
-
     MAX_REDIS_QUEUE_PER_USER: int = 25
 
     @property # Hot fix: cast env variable to a list

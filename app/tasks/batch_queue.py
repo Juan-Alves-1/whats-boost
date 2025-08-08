@@ -1,6 +1,6 @@
 from app.worker import celery
 from celery.exceptions import Retry, MaxRetriesExceededError
-from app.config.settings import Settings
+from app.config.settings import settings
 from app.utils.redis_client import get_user_lock_status, acquire_user_lock, release_user_lock, redis_client
 from app.utils.media_helpers import get_typing_range_ms
 from app.utils.logger import logger
@@ -37,7 +37,9 @@ def enqueue_user_media_batch(payload: dict):
     payload_json = json.dumps(payload)
     email = payload["user_email"]
     queue_key = f"queue:user:{email}"
-    max_queue_per_user = Settings.MAX_REDIS_QUEUE_PER_USER # Note that 1st batch does not count (n + 1)
+
+    # Note that 1st batch does not count (n + 1)
+    max_queue_per_user = int(settings.MAX_REDIS_QUEUE_PER_USER )
 
     try: 
         max_delay_ms = max(get_typing_range_ms(payload["caption"]) or [3000])  # default fallback to 2s  

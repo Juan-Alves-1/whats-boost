@@ -1,4 +1,5 @@
 from app.utils.logger import logger
+from app.config.settings import Settings
 
 """
     Estimates a realistic typing delay range for the EVO API 
@@ -6,20 +7,20 @@ from app.utils.logger import logger
     Returns (min_delay_ms, max_delay_ms).
 """
 
-
 def get_typing_range_ms(caption: str) -> tuple[int, int]:
-    average_typer = 6 
-    fast_typer = 8 
-    super_typer = 12
-    turbo_mode_baseline = 75
-    turbo_mode_topline = 90
+    min_speed = int(Settings.MIN_TYPING_SPEED)
+    max_speed = int(Settings.MAX_TYPING_SPEED)
     length = len(caption) 
-    adjusted_length = length - 90 if length > 260 else length # Half-baked solution: imply join group links as a copy and paste action
 
-    # Adjust to return int: e.g. replace / with //
+    if min_speed <= 0 or max_speed <= 0:
+        raise ValueError("Typing speeds must be positive integers")
+
     try: 
-        min_time = (adjusted_length / turbo_mode_topline) * 1000
-        max_time = (adjusted_length / turbo_mode_baseline) * 1000
+        min_time = (length // max_speed) * 1000
+        max_time = (length // min_speed) * 1000
         return round(min_time), round(max_time)
+    
+    except ValueError as e:
+        logger.error("Invalid typing speed configuration: %s", e)
     except Exception:
         logger.error("Unable to get dynamic typing for delays (between subtasks) and WhatsApp presence (EVO delay)")

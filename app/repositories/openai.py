@@ -93,7 +93,7 @@ class OpenAIRepository:
                 3. LINK 
                     - 🔥 Link direto da promo: full affiliate URL
                 4. CONSTANT MESSAGE
-                    - Simply add the following to the end of the message "✅ Entre no nosso grupo de promos: chat.whatsapp.com/L2bwwzAxK8t8YQ2Hvh0Kl1"
+                    - Simply add the following to the end of the message "✅ Entre no nosso grupo de promos: chat.whatsapp.com/Fc0wDVXB744LrEO1bZeT79"
             
                 Example below according to template aforementioned:
                     Example 1:
@@ -101,13 +101,13 @@ class OpenAIRepository:
                         "De R$ 23"
                         "Por R$ 13 \n\n"
                         "🔥 Link direto da promo: https://amzlink.to/example \n\n"
-                        "✅ Entre no nosso grupo de promos: chat.whatsapp.com/L2bwwzAxK8t8YQ2Hvh0Kl1"
+                        "✅ Entre no nosso grupo de promos: chat.whatsapp.com/Fc0wDVXB744LrEO1bZeT79"
 
                     Example 2:
                         "Pack de Coca-Cola sem açucar\n\n"
                         "Por R$ 13 \n\n"
                         "🔥 Link direto da promo: https://amzlink.to/example \n\n"
-                        "✅ Entre no nosso grupo de promos: chat.whatsapp.com/L2bwwzAxK8t8YQ2Hvh0Kl1"
+                        "✅ Entre no nosso grupo de promos: chat.whatsapp.com/Fc0wDVXB744LrEO1bZeT79"
             
             Constraints:  
                 - Only return the WhatsApp message text. No commentary or markdown
